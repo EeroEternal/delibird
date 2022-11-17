@@ -31,6 +31,12 @@ pip install -e .
 $ python -m build
 ```
 
+### pip
+
+```bash
+$ pip install delibird
+```
+
 ## Usage
 
 Input 'delibird' in command line. The usage lint will be displayed.

@@ -1,0 +1,159 @@
+"""Mock work."""
+import uuid
+from itertools import repeat
+from multiprocessing import cpu_count
+from multiprocessing.pool import Pool
+from pathlib import Path
+
+import pyarrow as pa
+import pyarrow.parquet as pq
+
+from delibird.database import db, insert_list, table_by_arrow, table_exist
+from delibird.mock import gen_dict, gen_dict_list, gen_list_list, schema_from_dict
+from delibird.util import show
+
+
+def write_table(engine, dsn, table_name, schema, row_number):
+    """Mock data and write to table.
+
+    Args:
+        dsn (str): database connect string
+        table_name (str): table name
+        schema (schema): parquet schema
+        row_number (int): row number
+    """
+    # connect database
+    conn = db.connect(engine, dsn)
+    if not conn:
+        show("connect failed")
+        return False
+
+    # convert to arrow schema
+    arrow_schema = schema_from_dict(schema)
+
+    # check if table exists
+    if not table_exist(conn, table_name):
+        # create table
+        table_by_arrow(conn, table_name, arrow_schema)
+
+    # insert data
+    batch_size = 1024 * 1024
+
+    # batch copy data to database table by COPY protocol
+    for i in range(0, row_number, batch_size):
+        if i + batch_size > row_number:
+            number = row_number - i
+        else:
+            number = batch_size
+
+        # generate data
+        dict_data = gen_list_list(engine, schema, number)
+
+        # write to table
+        insert_list(dict_data, conn, table_name)
+
+    # close connection
+    conn.close()
+
+    return True
+
+
+def write_parquet(filepath, columns, row_number, batch_size=1024 * 1024):
+    """Mock data, Write to parquet file.
+
+    Args:
+        filepath (str): file path
+        columns (dict): columns
+        row_number (int): row number
+        batch_size (int, optional): batch size. Defaults to 1024*1024.
+    """
+    # arrow schema
+    arrow_schema = schema_from_dict(columns)
+
+    # generate data as dict
+    dict_list = gen_dict_list(columns, row_number)
+
+    # check file exist
+    path = Path(filepath)
+
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True)
+
+    path.touch(exist_ok=True)
+
+    # write to parquet file
+    offset = 0
+    length = len(dict_list)
+    with pq.ParquetWriter(filepath, schema=arrow_schema) as writer:
+        while True:
+            # count batch size
+            if offset + batch_size > length:
+                count = length - offset
+            else:
+                count = batch_size
+
+            # write batch
+            batch = pa.RecordBatch.from_pylist(
+                mapping=dict_list[offset:(offset+count)], schema=arrow_schema
+            )
+            writer.write_batch(batch)
+
+            # check if write finish
+            if offset + batch_size > length:
+                break
+
+            # refresh offset
+            offset += batch_size
+
+    show('write parquet finished')
+    return True
+
+
+def write_directory(directory, columns, row_number, batch_size=1024 * 1024):
+    """Mock write to parquet file.
+
+    Args:
+        directory (str): directory name
+        columns (dict): columns
+        row_number (int): row number
+        batch_size (int): write batch size
+    """
+    # multiprocess starmap
+    with Pool(processes=cpu_count()) as pool:
+        # init batch number list
+        record_list = [batch_size for _ in range(row_number // batch_size)]
+        if row_number % batch_size:
+            record_list.append(row_number % batch_size)
+
+        # map write
+        pool.starmap(batch_write, zip(repeat(columns), repeat(directory), record_list))
+
+    show('write directory finished')
+    return True
+
+
+def batch_write(columns, directory, record_number):
+    """Batch write to parquet file.
+
+    Args:
+        columns (dict): columns
+        directory (str): directory name
+        record_number (int): record number
+    """
+    # root directory
+    root = Path(directory)
+    root.mkdir(parents=True, exist_ok=True)
+
+    # arrow schema
+    arrow_schema = schema_from_dict(columns)
+
+    # generate data as dict
+    dict_list = gen_dict(columns, record_number)
+
+    # init file name and parquet writer
+    file_name = uuid.uuid4().hex + ".parquet"
+    with pq.ParquetWriter(root / file_name, schema=arrow_schema) as writer:
+
+        # write to parquet file
+        record_batch = pa.RecordBatch.from_pylist(mapping=dict_list, schema=arrow_schema)
+        writer.write_batch(record_batch)

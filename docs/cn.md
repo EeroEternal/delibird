@@ -1,23 +1,23 @@
-# delibird: a transformer between database and Parquet file
+# delibird ：数据库和 Parquet 之间的转换工具
 
-## Introduction:
+## 功能：
 
-delibird is a python tool library based on Python pyarrow which supports multithread and asynchronous calls. It can help users transform data between database and Parquet files.
+delibird 是一个 python 工具库，帮助在数据库表和 parquet 之间做转换。基于 Python 和 Pyarrow 开发，支持多进程、异步调用
 
-## Features:
+## 主要特性
 
-- Multithread: support batch reading/writeing and multithread functions an database table and Parquet files.
-- Read directory: reading all Parquet files in the giving directory and transform into database. One directory maps to one database table.
-- Mock data: create Parquet files or database tables in a customized schema.
-- Workflow: giving a yaml file including your customized configurations, delibird can create a workflow to execute multiple jobs.
+- 多进程操作：针对表和 parquet，支持 batch 读取和多进程操作
+- 支持目录：目录储存了分片的 parquet 文件，一个目录对应一个数据库表
+- mock 支持：自定义 schema ，生成 parquet 或数据库表
+- 工作流支持：在 yaml 文件定义多个操作，组成工作流执行
 
-## Limits:
+## 限制：
 
-- Only support Postgresql DB and Oracle DB by now.
+- 目前仅支持 postgres  , oracle 数据库
 
-## Installation
+## 安装
 
-### source code
+### 从源代码安装
 
 ```bash
 git clone https://gitee.com/lipicoder/delibird.git
@@ -25,15 +25,15 @@ cd delibird
 pip install -e .
 ```
 
-### Pypi
+### Pypi 安装
 
 ```bash
 $ python -m build
 ```
 
-## Usage
+## 使用
 
-Input 'delibird' in command line. The usage lint will be displayed.
+输入 delibird 会显示使用方法：
 
 ```sh
 (.env) % delibird
@@ -52,7 +52,7 @@ Commands:
 
 ### mock
 
-Example:
+一个生成 mock 的 yaml 示例：
 
 ```yaml
 # mock data workflow
@@ -120,11 +120,11 @@ mocks:
 
 ```
 
-```direction```  transform to which format. 'directory': a directory path. 'file': a file path. 'table': a database table name.
+```direction```  生成的类型/方向。"directory" 目录，"file" 文件，"table" 数据库表
 
-```columns``` defination of the database table. Support standard data types of Postgresql or Oracle db, based on which database you choose. delibird will auto map the database data type to pyarrow row data type. 'code' means stock code, which would be removed later.
+```columns``` 是 schema 定义。支持标准的 postgres 列数据类型，对应 pyarrow 数据类型。code 数据类型是指沪深股票代码，这个之后会去除
 
-execute mock workflow:
+执行这个 mock workflow:
 
 ```sh
 (.env) % delibird mock tests/yamls/mock_file.yaml
@@ -134,7 +134,8 @@ write parquet finished
 
 ### parquet
 
-Read data in database table and write data into a Parquet file or Parquet files in a directory. Or read data in a Parquet file or Parquet files in a directory and write data into a database table.
+从数据库读取表，写入到 parquet，或者是包含 parquet 的目录
+或者从 parquet 或者目录读取文件内容，写入到数据库表中
 
 ```sh
 (.env) % delibird parquet
@@ -150,13 +151,12 @@ Commands:
   write  Read from database and write to parquet file.
 ```
 
-#### **parquet read**
+#### **read 操作**
 
-Read data in a Parquet file or Parquet files in a directory and write data into a database table.
-
+读取文件，写入数据库表
 ```sh
 (.env) % delibird parquet read -h
-Usage: delibird parquet read [OPTIONS] [-e ENGINE] PATH DSN TABLE_NAME
+Usage: delibird parquet read [OPTIONS] PATH ENGINE DSN TABLE_NAME
 
   Read parquet file, write to database.
 
@@ -168,21 +168,19 @@ Options:
   -h, --help  Show this message and exit.
 ```
 
-Example:
+示例如下：
 
 ```sh
-delibird parquet read datasets/mock_data/mock_stocks.parquet postgresql://test:test123@localhost:5432/delibird mock_stocks -e postgresql
+delibird parquet read datasets/mock_data/mock_stocks.parquet postgresql postgresql://test:test123@localhost:5432/delibird mock_stocks
 ```
 
-#### **parquet write**:
+#### **write 操作**:
 
-Read data in database table and write data into a Parquet file or Parquet files in a directory.
-
-**directory**.
+读取数据库表，生成到**目录**中
 
 ```sh
 (.env) % delibird parquet write -h
-Usage: delibird parquet write [OPTIONS]  [-e ENGINE] PATH DSN TABLE_NAME
+Usage: delibird parquet write [OPTIONS] PATH ENGINE DSN TABLE_NAME
 
   Read from database and write to parquet file.
 
@@ -195,19 +193,19 @@ Options:
   -h, --help                Show this message and exit.
 ```
 
-Example:
+示例如下：
 
 ```sh
-delibird parquet write datasets/mock_data/mock_stocks_tmp postgresql://test:test123@localhost:5432/delibird mock_stocks -e postgresql
+delibird parquet write datasets/mock_data/mock_stocks_tmp postgresql postgresql://test:test123@localhost:5432/delibird mock_stocks
 ```
 
-parquet write supports configuration of batch size
+write 也可以支持设置 batch size
 
 ```sh
-delibird parquet write -s 1024 -e postgresql datasets/mock_data/mock_stocks postgresql://test:test123@localhost:5432/delibird mock_stocks
+delibird parquet write -s 1024  datasets/mock_data/mock_stocks postgresql postgresql://test:test123@localhost:5432/delibird mock_stocks
 ```
 
-In this case, the max row number of a single parquet file is 1024, we can see four files in the directory.
+这样的话，单个文件的最大记录数是1024，在目录下就可以看到有四个文件：
 
 ```sh
 (.env) % ls datasets/mock_data/mock_stocks
@@ -217,17 +215,17 @@ ea6c445914824cae8ef171bbafd3a58f.parquet
 2ba1952316344b01a2a2f8e6faf41c31.parquet
 ```
 
-**file**
+生成为**文件**
 
 ```sh
-delibird parquet write -e postgresql datasets/mock_data/mock_stocks_tmp.parquet postgresql://test:test123@localhost:5432/delibird mock_stocks;
+delibird parquet write datasets/mock_data/mock_stocks_tmp.parquet postgresql postgresql://test:test123@localhost:5432/delibird mock_stocks;
 ```
 
-Consider of reducing the memory usage and speed up the writing efficiency. write file can also support configuration of batch size.
+文件也可以设置 batch size ，主要是为了减少内存占用，提高写入效率
 
 ### workflow
 
-create and exectue a workflow using a yaml configuration file.
+建立一个处理的工作流，以 yaml 文件作为流程记录
 
 ```sh
 (.env) % delibird workflow  -h
@@ -239,7 +237,7 @@ Options:
   -h, --help  Show this message and exit.
 ```
 
-Example:
+示例如下：
 
 ```yaml
 workflows:
@@ -269,11 +267,11 @@ workflows:
 
 
 
-## TODO
+## 还需要完成的事
 
-- remove 'code' type from delibird mock. add new supported types such as random string and random digit string.
+- 去除 mock code 类型，提供支持 random 字符串、数字字符串类型
 
-## Dependency
+## 依赖
 
 pyarrow >=9.0.0
 

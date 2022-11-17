@@ -1,0 +1,15 @@
+# write parquet file to dir
+
+# workflow lists
+workflows:
+  - name: "info-stock-workflow" # workflow name
+    direction: "parquet"
+    table-name: "inf_stk_price" # table name
+    # password has @, add search_path dc , %3D is =
+    dsn : "postgresql://localhost:5432/delibird?user=test&password=test@123&options=-csearch_path%3Ddc"
+    write-type: "directory"
+    directory: "./datasets/write/stock_price"
+    partition: ["sec_hcode"]
+
+
+

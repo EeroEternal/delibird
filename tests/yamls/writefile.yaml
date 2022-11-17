@@ -1,0 +1,11 @@
+# write parquet file
+
+# workflow lists
+workflows:
+  - name: "write-file-workflow" # workflow name
+    direction: "parquet"
+    table-name: "mock_stocks" # table name
+    dsn : "postgresql://test:test123@localhost:5432/delibird"
+    write-type: "file"
+    filename: "./datasets/write/mock_stocks.parquet"
+

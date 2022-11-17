@@ -1,0 +1,27 @@
+# parquet read workflow
+
+# workflow lists
+workflows:
+  - name: "read-workflow" # workflow name
+    direction: "table" # table or parquet.table:read parquet ,write to table; parquet:read table ,write to parquet
+    table-name: "mock_stocks4" # table name
+    engine: "postgresql"
+    dsn : "postgresql://test:test123@localhost:5432/delibird"
+    read-type: "file" # file or directory
+    filepath: "./datasets/mock_data/mock_stocks_wf.parquet" # filepath
+
+  - name: "write-directory-workflow" # workflow name
+    direction: "directory"
+    table-name: "mock_stocks4" # table name
+    engine: "postgresql"
+    dsn : "postgresql://test:test123@localhost:5432/delibird"
+    directory: "./datasets/mock_data/mock_stocks_wf" # directory path
+    batch-size: 1024 # batch size
+
+  - name: "write-file-workflow" # workflow name
+    direction: "file"
+    table-name: "mock_stocks4" # table name
+    engine: "postgresql"
+    dsn : "postgresql://test:test123@localhost:5432/delibird"
+    filepath: "./datasets/mock_data/mock_stocks_wf_r.parquet"
+

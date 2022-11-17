@@ -1,0 +1,16 @@
+Metadata-Version: 2.1
+Name: delibird
+Version: 0.0.5
+Summary: exchange data between database or parquet files
+Home-page: https://github.com/lipicoder/delibird
+Author: lipi,zhujw
+Author-email: lipi <lipicoder@qq.com>, zhujw <kratoswittgenstein@gmail.com>
+License: MIT License
+Project-URL: Bug Tracker, https://github.com/lipicoder/delibird/issues
+Project-URL: Homepage, https://github.com/lipicoder/delibird
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+License-File: LICENSE
+
+delibird is a python tool library based on Python pyarrow which supports multithread and asynchronous calls. It can help users transform data between database and Parquet files.

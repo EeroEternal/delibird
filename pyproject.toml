@@ -1,0 +1,66 @@
+# pyproject.toml
+
+# [build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools >= 65", "wheel"]
+
+[project]
+authors = [
+  {name = "lipi", email = "lipicoder@qq.com"},
+  {name = "zhujw", email = "kratoswittgenstein@gmail.com"},
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "pyarrow == 9.0.0",
+  "click==8.1.3",
+  "psycopg == 3.1.4",
+  "pyarrow==9.0.0",
+  "PyYAML==6.0",
+  "pytz==2022.2.1",
+]
+description = 'exchange data between database or parquet files'
+name = 'delibird'
+version = '0.0.5'
+
+[project.urls]
+"Bug Tracker" = "https://github.com/lipicoder/delibird/issues"
+"Homepage" = "https://github.com/lipicoder/delibird"
+
+[project.scripts]
+delibird = "delibird.cli:cli"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.isort]
+profile = 'black'
+
+[tool.pylint]
+jobs = 2
+
+[tool.black]
+line-length = 88
+target-version = ['py310', 'py311']
+# We use preview style for formatting Black itself. If you
+# want stable formatting across releases, you should keep
+# this off.
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | build
+  | dist
+  # The following are specific to Black, you probably don't want those.
+  | blib2to3
+  | tests/data
+  | profiling
+)/
+'''
+preview = true

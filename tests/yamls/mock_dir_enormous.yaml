@@ -1,0 +1,22 @@
+# mock data workflow
+
+# workflow lists
+mocks:
+  - name: "mock-to-directory"
+    row-number: 2048000
+    direction: "directory" # directory ,file or  table
+    directory: "./datasets/mock_data/mock_stocks_enormous" 
+    columns: {
+                # stock code as a type
+                "sec_code": "code",  # "600001"
+                "v_date": "date",  # 2022-08-24
+                "close": "float",  # 16.87
+                "open": "float",  # 16.65
+                "high": "float",  # 16.95
+                "low": "float",  # 16.55
+                "hold": "decimal(10,5)",  # 123.25515
+                "time": "timestample(unit=s,tz=Asia/Shanghai)",
+                "volume": "int",  # 1530231
+                "amount": "int",  # 2571196416
+                "memo":"string", # hello
+            }

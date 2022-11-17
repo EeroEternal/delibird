@@ -24,7 +24,7 @@ dependencies = [
 ]
 description = 'exchange data between database or parquet files'
 name = 'delibird'
-version = '0.0.5'
+version = '0.0.6'
 
 [project.urls]
 "Bug Tracker" = "https://github.com/lipicoder/delibird/issues"

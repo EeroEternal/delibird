@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: delibird
-Version: 0.0.5
+Version: 0.0.6
 Summary: exchange data between database or parquet files
 Home-page: https://github.com/lipicoder/delibird
 Author: lipi,zhujw

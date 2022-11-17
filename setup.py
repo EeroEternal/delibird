@@ -13,11 +13,11 @@ from distutils import log
 
 long_desc = """delibird is a python tool library based on Python pyarrow which supports multithread and asynchronous calls. It can help users transform data between database and Parquet files."""
 
-requires = ["pyarrow", "psecopy", "click"]
+requires = ["pyarrow", "psycopy", "click"]
 
 setup(
     name="delibird",
-    version="0.0.5",
+    version="0.0.6",
     url="https://github.com/lipicoder/delibird",
     license="MIT License",
     author="lipi,zhujw",

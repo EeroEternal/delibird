@@ -1,9 +1,9 @@
 """Init."""
 
 from .show import show
-from .memory import simple_safe_size
+from .memory import simple_batch_size
 
 __all__ = [
     "show",
-    "simple_safe_size"
+    "simple_batch_size"
 ]

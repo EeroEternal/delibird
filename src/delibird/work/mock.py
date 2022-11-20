@@ -10,7 +10,7 @@ import pyarrow.parquet as pq
 
 from delibird.database import db, insert_list, table_by_arrow, table_exist
 from delibird.mock import gen_dict, gen_dict_list, gen_list_list, schema_from_dict
-from delibird.util import show, simple_safe_size
+from delibird.util import show, simple_batch_size
 
 
 def write_table(engine, dsn, table_name, schema, row_number):
@@ -120,16 +120,17 @@ def write_directory(directory, columns, row_number, batch_size=1024 * 1024):
         row_number (int): row number
         batch_size (int): write batch size
     """
-    # multiprocess starmap
-    # init batch number list
-    record_list = [batch_size for _ in range(row_number // batch_size)]
-    if row_number % batch_size:
-        record_list.append(row_number % batch_size)
-
+    # adjust a reasonable batch_size which would not cause an OutOfMemoryError
     sample_dict_list = gen_dict(columns, 1)
-    safe_pool_size = simple_safe_size(sample_dict_list, record_list[0])
+    safe_batch_size = simple_batch_size(sample_dict_list, min(row_number, batch_size))
     
-    with Pool(processes=min(cpu_count(), safe_pool_size)) as pool:
+    with Pool(processes=cpu_count()) as pool:
+        # multiprocess starmap
+        # init batch number list
+        record_list = [safe_batch_size for _ in range(row_number // safe_batch_size)]
+        if row_number % safe_batch_size:
+            record_list.append(row_number % safe_batch_size)
+
         # map write
         pool.starmap(batch_write, zip(repeat(columns), repeat(directory), record_list))
 

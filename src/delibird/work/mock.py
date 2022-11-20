@@ -10,7 +10,7 @@ import pyarrow.parquet as pq
 
 from delibird.database import db, insert_list, table_by_arrow, table_exist
 from delibird.mock import gen_dict, gen_dict_list, gen_list_list, schema_from_dict
-from delibird.util import show
+from delibird.util import show, simple_batch_size
 
 
 def write_table(engine, dsn, table_name, schema, row_number):
@@ -71,7 +71,7 @@ def write_parquet(filepath, columns, row_number, batch_size=1024 * 1024):
     arrow_schema = schema_from_dict(columns)
 
     # generate data as dict
-    dict_list = gen_dict_list(columns, row_number)
+    # dict_list = gen_dict_list(columns, row_number, batch_size)
 
     # check file exist
     path = Path(filepath)
@@ -82,28 +82,30 @@ def write_parquet(filepath, columns, row_number, batch_size=1024 * 1024):
     path.touch(exist_ok=True)
 
     # write to parquet file
-    offset = 0
-    length = len(dict_list)
+    # offset = 0
+    # length = len(dict_list)
     with pq.ParquetWriter(filepath, schema=arrow_schema) as writer:
-        while True:
+        # while True:
+        for dict_list in gen_dict_list(columns, row_number, batch_size):
             # count batch size
-            if offset + batch_size > length:
-                count = length - offset
-            else:
-                count = batch_size
+            # if offset + batch_size > length:
+                # count = length - offset
+            # else:
+                # count = batch_size
 
             # write batch
             batch = pa.RecordBatch.from_pylist(
-                mapping=dict_list[offset:(offset+count)], schema=arrow_schema
+                # mapping=dict_list[offset:(offset+count)], schema=arrow_schema
+                mapping=dict_list, schema=arrow_schema
             )
             writer.write_batch(batch)
 
             # check if write finish
-            if offset + batch_size > length:
-                break
+            # if offset + batch_size > length:
+                # break
 
             # refresh offset
-            offset += batch_size
+            # offset += batch_size
 
     show('write parquet finished')
     return True
@@ -118,12 +120,16 @@ def write_directory(directory, columns, row_number, batch_size=1024 * 1024):
         row_number (int): row number
         batch_size (int): write batch size
     """
-    # multiprocess starmap
+    # adjust a reasonable batch_size which would not cause an OutOfMemoryError
+    sample_dict_list = gen_dict(columns, 1)
+    safe_batch_size = simple_batch_size(sample_dict_list, min(row_number, batch_size))
+    
     with Pool(processes=cpu_count()) as pool:
+        # multiprocess starmap
         # init batch number list
-        record_list = [batch_size for _ in range(row_number // batch_size)]
-        if row_number % batch_size:
-            record_list.append(row_number % batch_size)
+        record_list = [safe_batch_size for _ in range(row_number // safe_batch_size)]
+        if row_number % safe_batch_size:
+            record_list.append(row_number % safe_batch_size)
 
         # map write
         pool.starmap(batch_write, zip(repeat(columns), repeat(directory), record_list))

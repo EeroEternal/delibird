@@ -51,7 +51,7 @@ def gen_dict_seq(columns, count, chunk_size=1024):
         yield dict_data
 
 
-def gen_dict_list(columns, count, chunk_size=None):
+def gen_dict_list(columns, count, batch_size, chunk_size=None):
     """Generate dict's list.
 
     Args:
@@ -63,6 +63,7 @@ def gen_dict_list(columns, count, chunk_size=None):
         list: dict list. e.g [{"sec_code":"600001", "count": 20},{"sec_code":"600001", "count": 25}]
 
     """
+    offset = 0
     cpu = cpu_count()
 
     if cpu > 1:
@@ -70,12 +71,26 @@ def gen_dict_list(columns, count, chunk_size=None):
     else:
         cores = cpu
 
-    with Pool(processes=cores) as pool:
-        result = pool.map_async(
-            gen_dict_one, repeat(columns, count), chunksize=chunk_size
-        ).get()
+    while True:
+        # count batch size
+        if offset + batch_size > count:
+            sub_count = count - offset
+        else:
+            sub_count = batch_size
 
-    return result
+        with Pool(processes=cores) as pool:
+            result = pool.map_async(
+                gen_dict_one, repeat(columns, sub_count), chunksize=chunk_size
+            ).get()
+
+        # check if write finish
+        if offset + batch_size > count:
+            break
+
+        # refresh offset
+        offset += batch_size
+
+        yield result
 
 
 def gen_list_list(engine, columns, count):

@@ -14,10 +14,10 @@ def parquet():
 
 @parquet.command()
 @click.argument("path", type=click.Path(exists=True, file_okay=True, dir_okay=True))
-@click.option("-e", "--engine", default="postgresql", type=str)
 @click.argument("dsn")
 @click.argument("table_name")
-def read(path, engine, dsn, table_name):
+@click.option("-e", "--engine", default="postgresql", type=str)
+def read(path, dsn, table_name, engine):
     """Read parquet file, write to database.
 
     dsn sample:postgresql://user:password@host:port/dbname.
@@ -31,11 +31,11 @@ def read(path, engine, dsn, table_name):
 
 @parquet.command()
 @click.argument("path", type=click.Path(file_okay=True, dir_okay=True))
-@click.option("-e", "--engine", default="postgresql", type=str)
 @click.argument("dsn")
 @click.argument("table_name")
+@click.option("-e", "--engine", default="postgresql", type=str)
 @click.option("-s", "--batch_size", default=1024 * 1024, type=int)
-def write(path, engine, dsn, table_name, batch_size):
+def write(path, dsn, table_name, engine, batch_size):
     """Read from database and write to parquet file.
 
     dsn sample:postgresql://user:password@host:port/dbname.
@@ -44,12 +44,12 @@ def write(path, engine, dsn, table_name, batch_size):
     if path_obj.exists() is False:
         # check dir or file
         if path_obj.suffix == ".parquet":
-            write_parquet(path, engine, dsn, table_name, batch_size)
+            write_parquet(path, dsn, table_name, engine, batch_size)
         else:
-            write_directory(path, engine, dsn, table_name, batch_size)
+            write_directory(path, dsn, table_name, engine, batch_size)
     else:
         # file or directory exist
         if path_obj.is_dir():
-            write_directory(path, engine, dsn, table_name, batch_size)
+            write_directory(path, dsn, table_name, engine, batch_size)
         if path_obj.is_file():
-            write_parquet(path, engine, dsn, table_name, batch_size)
+            write_parquet(path, dsn, table_name, engine, batch_size)

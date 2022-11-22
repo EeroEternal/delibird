@@ -20,6 +20,12 @@ from delibird.work import read_parquet
             "oracle",
             "system/oracle@222.71.193.222:43301/xe",
             "mock_stocks_eng",
+        ),
+        (
+            "./datasets/mock_data/mock_my.parquet",
+            "mysql",
+            "jdbc:mysql://localhost:3306/test?user=root&password=feng17zhu",
+            "mock_read_my"
         )
     ],
 )
@@ -42,7 +48,7 @@ def test_read_parquet(filepath, engine, dsn, table_name):
     conn.commit()
 
     # test from parquet function
-    read_parquet(filepath, engine, dsn, table_name)
+    read_parquet(filepath, dsn, table_name, engine)
 
     # check table exist
     cursor.execute(f"SELECT COUNT(*) FROM {table_name}")

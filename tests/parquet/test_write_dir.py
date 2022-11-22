@@ -21,6 +21,12 @@ from delibird.work import write_directory
             "oracle",
             "system/oracle@222.71.193.222:43301/xe",
             "mock_stocks_eng",
+        ),
+        (
+            "./datasets/mock_data/mock_read_my",
+            "mysql",
+            "jdbc:mysql://localhost:3306/test?user=root&password=feng17zhu",
+            "mock_stocks_my"
         )
     ],
 )
@@ -46,7 +52,7 @@ def test_write_dir(directory, engine, dsn, table_name):
             assert False
 
     # test from parquet function
-    write_directory(directory, engine, dsn, table_name, batch_size=10240)
+    write_directory(directory, dsn, table_name, engine, batch_size=10240)
 
     # check file exist
     assert path.exists() and path.is_dir()

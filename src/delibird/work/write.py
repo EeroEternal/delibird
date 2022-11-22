@@ -8,7 +8,6 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from delibird.database import create_arrow_schema, db, table_exist
-from delibird.util import show
 
 
 def write_directory(directory, dsn, table_name, engine="postgresql", batch_size=1024 * 1024):
@@ -96,7 +95,7 @@ def range_write_parquet(directory, engine, dsn, schema, table_name, record_range
     # get record according to record range
     cursor = conn.cursor(dict_row_flag=True)
     index, count = record_range
-    if engine == "postgresql":
+    if engine == "postgresql" or engine == "mysql":
         cursor.execute(f"select * from {table_name} limit {count} offset {index * count}")
     elif engine == "oracle":
         cursor.execute(f"select * from {table_name} where rownum <= {count} "\
@@ -139,7 +138,6 @@ def write_parquet(filepath, dsn, table_name, engine="postgresql", batch_size=102
 
     # create schema
     schema = create_arrow_schema(engine, dsn, table_name)
-    show(schema)
     # batch get and write to parquet file
     cursor = conn.cursor(dict_row_flag=True)
     offset = 0
@@ -155,7 +153,7 @@ def write_parquet(filepath, dsn, table_name, engine="postgresql", batch_size=102
     # write to parquet file
     with pq.ParquetWriter(filepath, schema) as writer:
         while True:
-            if engine == "postgresql":
+            if engine == "postgresql" or engine == "mysql":
                 cursor.execute(
                     f"select * from {table_name} limit {batch_size} offset {offset}"
                 )

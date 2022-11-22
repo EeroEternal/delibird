@@ -5,3 +5,4 @@ PyYAML==6.0
 pytz==2022.2.1
 oracledb==1.1.1
 PyMySQL==1.0.2
+alive-progress==2.4.1

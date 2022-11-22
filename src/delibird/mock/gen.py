@@ -104,7 +104,7 @@ def gen_list_list(engine, columns, count):
     """
     list_data = []
     for _ in range(0, count):
-        if engine == "postgresql":
+        if engine == "postgresql" or engine == "mysql":
             list_value = []
             for col in columns:
                 list_value.append(map_value(columns[col]))

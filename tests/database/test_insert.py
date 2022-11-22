@@ -22,6 +22,13 @@ from delibird.database import db, insert_batch, table_by_arrow, table_exist
             "system/oracle@222.71.193.222:43301/xe",
             "mock_stocks_ora",
             1024,
+        ),
+        (
+            "./datasets/mock_data/mock_my.parquet",
+            "mysql",
+            "jdbc:mysql://localhost:3306/test?user=root&password=feng17zhu",
+            "mock_stocks_in",
+            2048
         )
     ],
 )

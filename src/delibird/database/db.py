@@ -1,5 +1,6 @@
 """DB API wrapper."""
 from .connection import Connection
+from .mysql import dsn_to_args
 
 
 class Database:
@@ -36,5 +37,9 @@ class Database:
         Args:
             engine (str): engine
         """
+        if engine == 'mysql':
+            if len(kwargs) == 0 and len(args) == 1:
+                dsn_to_args(args[0], kwargs)
+            return Connection(engine, **kwargs)
         # pylint: disable = too-many-function-args
         return Connection(engine, *args, **kwargs)

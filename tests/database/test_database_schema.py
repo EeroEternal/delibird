@@ -15,6 +15,10 @@ from delibird.database import db
         (
             "oracle",
             "system/oracle@222.71.193.222:43301/xe"
+        ),
+        (
+            "mysql",
+            "jdbc:mysql://localhost:3306/test?user=root&password=feng17zhu"
         )
     ]
 )

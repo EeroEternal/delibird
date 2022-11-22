@@ -13,6 +13,7 @@ from delibird.database import db, table_exist
         ("postgresql", "postgresql://test:test123@localhost:5432/delibird", "notexist"),
         ("oracle", "system/oracle@222.71.193.222:43301/xe", "mock_stocks_ora"),
         ("oracle", "system/oracle@222.71.193.222:43301/xe", "mock_stocks_o"),
+        ("mysql", "jdbc:mysql://localhost:3306/test?user=root&password=feng17zhu", "mock_stocks_in")
     ],
 )
 def test_table_exist(engine, dsn, table_name):

@@ -24,6 +24,11 @@ class Connection:
 
             oracledb.init_oracle_client()
             self._conn = oracledb.connect(*args, **kwargs)
+        elif engine == 'mysql':
+            # pylint: disable = import-outside-toplevel
+            import pymysql
+
+            self._conn = pymysql.connect(*args, **kwargs)
 
     @classmethod
     def connection(cls, *args, **kwargs):
@@ -45,7 +50,10 @@ class Connection:
     def cursor(self, dict_row_flag=False):
         """Get the cursor of the connection."""
         if self.autocommit is True:
-            self._conn.autocommit = True
+            if engine == "mysql":
+                self._conn.autocommit(True)
+            else:
+                self._conn.autocommit = True
         engine = self.engine
         if engine == "postgresql":
             if dict_row_flag is True:
@@ -60,6 +68,14 @@ class Connection:
             if dict_row_flag is True:
                 _cursor.rowfactory = \
                     lambda *args: dict(zip([d[0] for d in _cursor.description], args))
+        elif engine == "mysql":
+            if dict_row_flag is True:
+                # pylint: disable = import-outside-toplevel
+                from pymysql.cursors import DictCursor
+
+                _cursor = self._conn.cursor(DictCursor)
+            else:
+                _cursor = self._conn.cursor()
         return _cursor
 
     def commit(self):

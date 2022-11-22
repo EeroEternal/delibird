@@ -43,6 +43,8 @@ def test_schema(engine, schema):
         assert sql_schema_inner == "id integer, name varchar(255), age bigint"
     elif engine == "oracle":
         assert sql_schema_inner == "id integer, name varchar2(255), age number(38,8)"
+    elif engine == "mysql":
+        assert sql_schema_inner == "id mediumint, name varchar(255), age int"
 
 @pytest.mark.parametrize(
     "dsn,table_name",

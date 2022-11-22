@@ -56,6 +56,31 @@ schema_dict = {"postgresql": {
         "struct": "varchar2(4000)",
         "duration": "varchar2(4000)",
         "null": "varchar2(4000)",
+    }, "mysql": {
+        "int8": "tinyint",
+        "int16": "smallint",
+        "int32": "mediumint",
+        "int64": "int",
+        "uint8": "tinyint",
+        "uint16": "smallint",
+        "uint32": "mediumint",
+        "uint64": "int",
+        "float": "float",
+        "float32": "float",
+        "float64": "float",
+        "double": "decimal(25,8)",
+        "bool": "varchar(10)",
+        "string": "varchar(255)",
+        "large_string": "text",
+        "binary": "blob",
+        "large_binary": "longblob",
+        "time32": "timestamp",
+        "time64": "timestamp",
+        "list": "varchar(2000)",
+        "large_list": "varchar(4000)",
+        "struct": "varchar(4000)",
+        "duration": "varchar(4000)",
+        "null": "varchar(100)",
     }}
 
 def create_arrow_schema(engine, dsn, table_name):
@@ -76,7 +101,7 @@ def create_arrow_schema(engine, dsn, table_name):
 
     # set dict cursor
     cursor = conn.cursor(dict_row_flag=True)
-    if engine == "postgresql":
+    if engine == "postgresql" or engine == "mysql":
         cursor.execute(f"select * from {table_name} limit 1")
     elif engine == "oracle":
         cursor.execute(f"select * from {table_name} where rownum <= 1")
@@ -89,7 +114,7 @@ def create_arrow_schema(engine, dsn, table_name):
     for col in cursor.description:
         if engine == "postgresql":
             type_list.append(pa.field(col.name, arrow_type(engine, col)))
-        elif engine == "oracle":
+        elif engine == "oracle" or engine == "mysql":
             type_list.append(pa.field(col[0], arrow_type(engine, col)))
 
     # create schema
@@ -111,7 +136,7 @@ def parquet_schema(conn, table_name) -> pa.Schema:
     # set dict cursor
     cursor = conn.cursor(dict_row_flag=True)
     engine = conn.engine
-    if engine == "postgresql":
+    if engine == "postgresql" or engine == "mysql":
         cursor.execute(f"select * from {table_name} limit 1")
     elif engine == "oracle":
         cursor.execute(f"select * from {table_name} where rownum <= 1")
@@ -142,6 +167,9 @@ def arrow_type(engine, col):
     """
     # database type map to arrow type
     type_map = {
+        "tinyint": pa.int8(),
+        "smallint": pa.int16(),
+        "mediumint": pa.int32(),
         "int4": pa.int8(),
         "int8": pa.int8(),
         "int16": pa.int16(),
@@ -153,8 +181,10 @@ def arrow_type(engine, col):
         "float16": pa.float32(),
         "float32": pa.float32(),
         "float64": pa.float64(),
+        "double": pa.float64(),
         "DB_TYPE_NUMBER": pa.float64(),
         "boolean": pa.bool_(),
+        "blob": pa.large_binary(),
         "varchar": pa.string(),
         "varchar2": pa.string(),
         "varchar(255)": pa.string(),
@@ -168,12 +198,44 @@ def arrow_type(engine, col):
         "DB_TYPE_TIMESTAMP": pa.timestamp(unit="s"),
     }
 
+    mysql_type_mapper = {
+        0: "float64",
+        1: "tinyint",
+        2: "int",
+        3: "int",
+        4: "float",
+        5: "float64",
+        6: "null",
+        7: "timestamp",
+        8: "longint",
+        9: "int",
+        10: "date",
+        11: "time",
+        12: "datetime",
+        13: "year",
+        14: "newdate",
+        15: "varchar",
+        16: "varchar",
+        245: "varchar",
+        246: "numeric",
+        247: "varchar",
+        248: "varchar",
+        249: "blob",
+        250: "blob",
+        251: "longblob",
+        252: "blob",
+        253: "varchar",
+        254: "text"
+    }
+
     # trick to get arrow type, only to psycopy
     if engine == "postgresql":
         # pylint: disable=protected-access
         type_name = col._type.name
     elif engine == "oracle":
         type_name = col[1].name
+    elif engine == "mysql":
+        type_name = mysql_type_mapper[col[1]]
 
     result = None
     # numeric type , need to get precision and scale
@@ -182,6 +244,11 @@ def arrow_type(engine, col):
             result = pa.decimal128(col.precision, col.scale)
         elif engine == "oracle":
             result = pa.decimal128(col[2], col[3])
+        elif engine == "mysql":
+            if col[4] < col[5]:
+                result = pa.decimal128(col[5], col[4])
+            else:
+                result = pa.decimal128(col[4], col[5])
     elif type_name == "date":
         # check if date is in days or seconds
         result = pa.date32()

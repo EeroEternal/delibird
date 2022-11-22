@@ -23,6 +23,12 @@ from delibird.work import write_parquet
             "oracle",
             "system/oracle@222.71.193.222:43301/xe",
             "mock_stocks_eng",
+        ),
+        (
+            "./datasets/mock_data/mock_read_my.parquet",
+            "mysql",
+            "jdbc:mysql://localhost:3306/test?user=root&password=feng17zhu",
+            "mock_stocks_my"
         )
     ],
 )
@@ -44,7 +50,7 @@ def test_write_parquet(filepath, engine, dsn, table_name):
             assert False
 
     # test from parquet function
-    write_parquet(filepath, engine, dsn, table_name)
+    write_parquet(filepath, dsn, table_name, engine)
 
     # check file exist
     assert path.exists()

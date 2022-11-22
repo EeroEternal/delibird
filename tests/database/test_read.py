@@ -29,6 +29,13 @@ from delibird.work import read_directory, read_parquet
             "oracle",
             "system/oracle@222.71.193.222:43301/xe",
             "mock_stocks_ora",
+        ),
+        (
+            None,
+            "./datasets/mock_data/mock_read",
+            "mysql",
+            "jdbc:mysql://localhost:3306/test?user=root&password=feng17zhu",
+            "mock_stocks_in"
         )
     ],
 )
@@ -46,13 +53,13 @@ def test_read(path, directory, engine, dsn, table_name):
     if path:
         filepath = Path(path)
         if filepath.exists & filepath.is_file():
-            result = read_parquet(path, engine, dsn, table_name)
+            result = read_parquet(path, dsn, table_name, engine)
             assert result == "success"
     elif directory:
         dir_ = Path(directory)
 
         if dir_.is_dir():
-            result = read_directory(directory, engine, dsn, table_name)
+            result = read_directory(directory, dsn, table_name, engine)
             assert result == "success"
         else:
             print("directory not exist")

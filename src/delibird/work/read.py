@@ -1,7 +1,7 @@
 """Read parquet file and write to database."""
 
 from itertools import repeat
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
 import pyarrow.parquet as pq
@@ -108,8 +108,8 @@ def read_directory(directory, dsn, table_name, engine="postgresql"):
     create_table_if_not_exist(files[0], engine, dsn, table_name)
 
     # read parquet file
-    with Pool() as pool:
-        pool.starmap(read_parquet, zip(files, repeat(engine), repeat(dsn), repeat(table_name)))
+    with Pool(processes=cpu_count()) as pool:
+        pool.starmap(read_parquet, zip(files, repeat(dsn), repeat(table_name), repeat(engine)))
 
     return True
 

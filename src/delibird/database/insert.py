@@ -21,7 +21,7 @@ def insert_arrow_table(table, conn, table_name):
 
 def gen_columns(engine, data):
     """Gen columns."""
-    if engine == "postgresql":
+    if engine == "postgresql" or engine == "mysql":
         return ",".join(["%s"] * len(data))
     elif engine == "oracle":
         return ",".join([":" + key for key in data.keys()])
@@ -62,7 +62,7 @@ def gen_batch_columns(engine, batch):
         batch (pyarrow.table.Table): parquet table
 
     """
-    if engine == "postgresql":
+    if engine == "postgresql" or engine == "mysql":
         return ",".join(["%s"] * batch.num_columns)
     elif engine == "oracle":
         column_datas = []
@@ -116,7 +116,7 @@ def table_values(engine, batch):
     values = []
     # row tuple
     for i in range(0, batch.num_rows):
-        if engine == "postgresql":
+        if engine == "postgresql" or engine == "mysql":
             row = ()
 
             # add data to row tuple

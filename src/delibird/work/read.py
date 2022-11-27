@@ -5,6 +5,8 @@ from multiprocessing import Pool, cpu_count
 from pathlib import Path
 
 import pyarrow.parquet as pq
+import math
+from alive_progress import alive_bar
 
 from delibird.database import create_table_by_schema, db, insert_batch, table_exist
 
@@ -17,31 +19,45 @@ def read_parquet(filepath, dsn, table_name, engine="postgresql"):
         dsn (str): data source name
         table_name (str): table name
     """
-    # check file exist
-    path = Path(filepath)
-    if path.exists() is False:
-        print(f"file not exist: {filepath}")
-        return None
 
-    if path.is_file() is False:
-        print(f"not a file: {filepath}")
-        return False
+    #start load bra
+    with alive_bar(2, dual_line=True, title='load parquet') as barload:
 
-    if path.suffix != '.parquet':
-        print(f"not a parquet file: {filepath}")
-        return None
+        # check file exist
+        path = Path(filepath)
+        if path.exists() is False:
+            print(f"file not exist: {filepath}")
+            return None
 
-    # check table exist
-    create_table_if_not_exist(filepath, engine, dsn, table_name)
+        if path.is_file() is False:
+            print(f"not a file: {filepath}")
+            return False
 
-    # batch read parquet file by row group
-    parquet_file = pq.ParquetFile(filepath)
+        if path.suffix != '.parquet':
+            print(f"not a parquet file: {filepath}")
+            return None
+
+        # check table exist
+        create_table_if_not_exist(filepath, engine, dsn, table_name)
+        barload()
+
+        # batch read parquet file by row group
+        parquet_file = pq.ParquetFile(filepath)
+        barload()
+
+
     for i in range(parquet_file.num_row_groups):
-        # read row group
-        row_group = parquet_file.read_row_group(i)
+        #start read bar
+        with alive_bar(1, dual_line=True,title='read parquet') as barread:
+            # read row group
+            row_group = parquet_file.read_row_group(i)
+            
+            #read readparquet
+            barread()
 
         # write row group to database
         read_row_group(row_group, engine, dsn, table_name)
+                
 
     return True
 
@@ -55,27 +71,33 @@ def read_row_group(row_group, engine, dsn, table_name, batch_size=1024 * 100):
         table_name (str): table name
         batch_size (int): batch size
     """
-    # connection
-    conn = db.connect(engine, dsn)
-    if not conn:
-        return None
+    #start write bar
+    with alive_bar(math.ceil(row_group.num_rows/batch_size), dual_line=True, title='write database') as barwrite:
 
-    # batch insert data to table
-    for i in range(0, row_group.num_rows, batch_size):
-        count = batch_size
+        # connection
+        conn = db.connect(engine, dsn)
+        if not conn:
+            return None
 
-        # avoid take out of bounds
-        if i + batch_size > row_group.num_rows:
-            count = row_group.num_rows - i
+        # batch insert data to table
+        for i in range(0, row_group.num_rows, batch_size):
+            count = batch_size
 
-        # get batch
-        batch = row_group.slice(i, count)
+            # avoid take out of bounds
+            if i + batch_size > row_group.num_rows:
+                count = row_group.num_rows - i
 
-        # write batch to database
-        insert_batch(batch, conn, table_name)
+            # get batch
+            batch = row_group.slice(i, count)
 
-    # clean up
-    conn.close()
+            # write batch to database
+            insert_batch(batch, conn, table_name)
+            
+            #show write
+            barwrite()
+
+        # clean up
+        conn.close()
 
     return True
 

@@ -3,6 +3,7 @@ import uuid
 from itertools import repeat
 from multiprocessing import Pool
 from pathlib import Path
+from alive_progress import alive_bar
 
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -19,59 +20,66 @@ def write_directory(directory, dsn, table_name, engine="postgresql", batch_size=
         table_name (str): table name
         batch_size (int): write batch size
     """
-    # connect database
-    conn = db.connect(engine, dsn)
-    if not conn:
-        print("connect failed")
-        return False
 
-    # get table count
-    cursor = conn.cursor()
-    cursor.execute(f"select count(*) from {table_name}")
-    row = cursor.fetchone()
-    count = row[0]
-    conn.close()
+    #start bra
+    with alive_bar(1) as bar:
+        
+        # connect database
+        conn = db.connect(engine, dsn)
+        if not conn:
+            print("connect failed")
+            return False
 
-    # get columns schema from database table
-    schema = create_arrow_schema(engine, dsn, table_name)
+        # get table count
+        cursor = conn.cursor()
+        cursor.execute(f"select count(*) from {table_name}")
+        row = cursor.fetchone()
+        count = row[0]
+        conn.close()
 
-    if not schema:
-        print("create schema failed")
-        return False
+        # get columns schema from database table
+        schema = create_arrow_schema(engine, dsn, table_name)
 
-    # split count according to batch size
-    record_index = list(range(count // batch_size))
-    record_range = list(zip(record_index, repeat(batch_size)))
+        if not schema:
+            print("create schema failed")
+            return False
 
-    if count % batch_size:
-        record_range.append((len(record_index), count % batch_size))
+        # split count according to batch size
+        record_index = list(range(count // batch_size))
+        record_range = list(zip(record_index, repeat(batch_size)))
 
-    # check directory exist.
-    # keep directory exist and no files in it
-    path = Path(directory)
-    if not path.exists():
-        path.mkdir(parents=True)
-    else:
-        if not path.is_dir():
-            path.unlink()
+        if count % batch_size:
+            record_range.append((len(record_index), count % batch_size))
+
+        # check directory exist.
+        # keep directory exist and no files in it
+        path = Path(directory)
+        if not path.exists():
+            path.mkdir(parents=True)
         else:
-            # remove directory and files
-            for file_obj in path.iterdir():
-                file_obj.unlink()
+            if not path.is_dir():
+                path.unlink()
+            else:
+                # remove directory and files
+                for file_obj in path.iterdir():
+                    file_obj.unlink()
 
-    # add work to multiprocessing pool
-    with Pool() as pool:
-        pool.starmap(
-            range_write_parquet,
-            zip(
-                repeat(directory),
-                repeat(engine),
-                repeat(dsn),
-                repeat(schema),
-                repeat(table_name),
-                record_range,
-            ),
-        )
+        # add work to multiprocessing pool
+        with Pool() as pool:
+            pool.starmap(
+                range_write_parquet,
+                zip(
+                    repeat(directory),
+                    repeat(engine),
+                    repeat(dsn),
+                    repeat(schema),
+                    repeat(table_name),
+                    record_range,
+                ),
+            )
+        
+        #show bar
+        bar()
 
     return True
 
@@ -86,33 +94,39 @@ def range_write_parquet(directory, engine, dsn, schema, table_name, record_range
         table_name (str): database table name
         record_range (tuple): record range
     """
-    # connect database
-    conn = db.connect(engine, dsn)
-    if not conn:
-        print("connect failed")
-        return False
+    #start bra
+    with alive_bar(1) as bar:
 
-    # get record according to record range
-    cursor = conn.cursor(dict_row_flag=True)
-    index, count = record_range
-    if engine == "postgresql" or engine == "mysql":
-        cursor.execute(f"select * from {table_name} limit {count} offset {index * count}")
-    elif engine == "oracle":
-        cursor.execute(f"select * from {table_name} where rownum <= {count} "\
-            "and rownum > {index * count}")
-        cursor.rowfactory = \
-            lambda *args: dict(zip([d[0] for d in cursor.description], args))
-    records = cursor.fetchall()
+        # connect database
+        conn = db.connect(engine, dsn)
+        if not conn:
+            print("connect failed")
+            return False
 
-    # random create filename
-    filename = uuid.uuid4().hex + ".parquet"
+        # get record according to record range
+        cursor = conn.cursor(dict_row_flag=True)
+        index, count = record_range
+        if engine == "postgresql" or engine == "mysql":
+            cursor.execute(f"select * from {table_name} limit {count} offset {index * count}")
+        elif engine == "oracle":
+            cursor.execute(f"select * from {table_name} where rownum <= {count} "\
+                "and rownum > {index * count}")
+            cursor.rowfactory = \
+                lambda *args: dict(zip([d[0] for d in cursor.description], args))
+        records = cursor.fetchall()
 
-    # get batch from table
-    batch = pa.RecordBatch.from_pylist(mapping=records, schema=schema)
+        # random create filename
+        filename = uuid.uuid4().hex + ".parquet"
 
-    # write to parquet file
-    with pq.ParquetWriter(Path(directory) / filename, schema) as writer:
-        writer.write_batch(batch)
+        # get batch from table
+        batch = pa.RecordBatch.from_pylist(mapping=records, schema=schema)
+
+        # write to parquet file
+        with pq.ParquetWriter(Path(directory) / filename, schema) as writer:
+            writer.write_batch(batch)
+        
+        #show bar
+        bar()
 
     return True
 
@@ -126,56 +140,62 @@ def write_parquet(filepath, dsn, table_name, engine="postgresql", batch_size=102
         table_name (str): database table name
         batch_size (int, optional): write batch size. Defaults to 1024*1024.
     """
-    # connect database
-    conn = db.connect(engine, dsn)
-    if not conn:
-        print("connect failed")
-        return False
+    #start bra
+    with alive_bar(1) as bar:
 
-    # check if table exist
-    if not table_exist(conn, table_name):
-        return False
+        # connect database
+        conn = db.connect(engine, dsn)
+        if not conn:
+            print("connect failed")
+            return False
 
-    # create schema
-    schema = create_arrow_schema(engine, dsn, table_name)
-    # batch get and write to parquet file
-    cursor = conn.cursor(dict_row_flag=True)
-    offset = 0
+        # check if table exist
+        if not table_exist(conn, table_name):
+            return False
 
-    # check file exist
-    path = Path(filepath)
+        # create schema
+        schema = create_arrow_schema(engine, dsn, table_name)
+            # batch get and write to parquet file
+        cursor = conn.cursor(dict_row_flag=True)
+        offset = 0
 
-    if not path.parent.exists():
-        path.parent.mkdir(parents=True)
+        # check file exist
+        path = Path(filepath)
 
-    path.touch(exist_ok=True)
+        if not path.parent.exists():
+            path.parent.mkdir(parents=True)
 
-    # write to parquet file
-    with pq.ParquetWriter(filepath, schema) as writer:
-        while True:
-            if engine == "postgresql" or engine == "mysql":
-                cursor.execute(
-                    f"select * from {table_name} limit {batch_size} offset {offset}"
-                )
-            elif engine == "oracle":
-                cursor.execute(
-                    f"select * from {table_name} where rownum <= {batch_size} and rownum > {offset}"
-                )
-                cursor.rowfactory = \
-                    lambda *args: dict(zip([d[0] for d in cursor.description], args))
-            rows = cursor.fetchmany(batch_size)
-            if not rows:
-                break
+        path.touch(exist_ok=True)
 
-            # rows to py table
-            batch = pa.RecordBatch.from_pylist(mapping=rows, schema=schema)
-            writer.write_batch(batch)
+        # write to parquet file
+        with pq.ParquetWriter(filepath, schema) as writer:
+            while True:
+                if engine == "postgresql" or engine == "mysql":
+                    cursor.execute(
+                        f"select * from {table_name} limit {batch_size} offset {offset}"
+                    )
+                elif engine == "oracle":
+                    cursor.execute(
+                        f"select * from {table_name} where rownum <= {batch_size} and rownum > {offset}"
+                    )
+                    cursor.rowfactory = \
+                        lambda *args: dict(zip([d[0] for d in cursor.description], args))
+                rows = cursor.fetchmany(batch_size)
+                if not rows:
+                    break
 
-            # refresh offset
-            offset += batch_size
+                # rows to py table
+                batch = pa.RecordBatch.from_pylist(mapping=rows, schema=schema)
+                writer.write_batch(batch)
 
-    # clean up
-    cursor.close()
-    conn.close()
+                # refresh offset
+                offset += batch_size
+
+        # clean up
+        cursor.close()
+        conn.close()
+
+        #show bar
+        bar()
 
     return True

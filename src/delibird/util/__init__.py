@@ -1,7 +1,7 @@
 """Init."""
 
-from .show import show
 from .memory import simple_batch_size
+from .show import show
 
 __all__ = [
     "show",

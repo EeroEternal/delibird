@@ -1,7 +1,6 @@
 """Test command line."""
 
 import pytest
-
 from test_cli_file import test_mock
 
 

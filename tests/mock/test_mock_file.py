@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
+import pyarrow.parquet as pq
 import pytest
 import yaml
-import pyarrow.parquet as pq
 
 from delibird.cli import mock_data
 from delibird.util import show

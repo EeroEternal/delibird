@@ -1,10 +1,10 @@
 """Analysis host memory"""
 
-import psutil
-import sys
 import math
-
+import sys
 from multiprocessing import cpu_count
+
+import psutil
 
 
 def avaliable_memory():

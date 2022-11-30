@@ -5,7 +5,6 @@ import pyarrow as pa
 from delibird.database import db, table_exist
 from delibird.mock import decimal_parse
 
-
 schema_dict = {"postgresql": {
         "int8": "smallint",
         "int16": "smallint",

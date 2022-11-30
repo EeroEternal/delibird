@@ -1,7 +1,7 @@
 """Database management."""
 
-from .db import Database as db
 from .check import table_exist
+from .db import Database as db
 from .insert import insert_arrow_table, insert_batch, insert_list
 from .schema import (
     create_arrow_schema,

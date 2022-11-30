@@ -1,6 +1,9 @@
 """Parse data type from file."""
 import pytz
 
+types = ("int", "string", "float", "date", "datetime",
+         "decimal", "timestamp")
+
 
 def decimal_parse(data):
     """Parse decimal str, get precision and scale.
@@ -23,7 +26,7 @@ def decimal_parse(data):
 
 
 def timestamp_parse(data):
-    """Parse timestampl str, get unit and timezone.
+    """Parse timestamp str, get unit and timezone.
 
     Args:
         data (str): timestamp str, e.g "timestamp(unit=s,tz=Asia/Shanghai)"

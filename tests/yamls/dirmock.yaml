@@ -3,20 +3,29 @@
 # workflow lists
 mocks:
   - name: "mock-to-directory"
-    row-number: 100000000
+    row-number: 20000000
     direction: "directory" # directory ,file or  table
-    directory: "./datasets/mock_data/dir" 
+    directory: "./datasets/funds/price"
     columns: {
-                # stock code as a type
-                "sec_code": "code",  # "600001"
-                "date": "date",  # 2022-08-24
-                "close": "float",  # 16.87
-                "open": "float",  # 16.65
-                "high": "float",  # 16.95
-                "low": "float",  # 16.55
-                "hold": "decimal(10,5)",  # 123.25515
-                # datetime.datetime(2022,10,25).timestamp()
-                "time": "timestample(unit=s,tz=Asia/Shanghai)",
-                "volume": "int",  # 1530231
-                "amount": "int",  # 2571196416
-            }
+      "id": "int(6)", # number with six digits
+      "editor_id": "string",
+      "create_time": "datetime",
+      "update_time": "datetime",
+      "data_source": "string",
+      "origin_db": "string", # origin database
+      "sec_code": "code", # inner code
+      "publish_data": "date",  # 2022-08-24
+      "source": "string", # info source
+      "end_date": "date",  # end date
+      "net_value": "decimal(18,4)", # NetValue
+      "unit_value": "decimal(20.8)",  # UnitNV
+      "profit": "decimal(20,8)",  # Daily Profit Rate
+      "week_yield": "decimal(18,8)",  # Weekly Yield
+      "rate_factor": "decimal(19,12)",  # Growth rate factor
+      "restore_value": "decimal(18,6)",  # Restored value of net asset
+      "grow_rate": "decimal(18,6)",  # Daily growth rate
+      "accu_unit": "decimal(20,8)",  # Accumulated unit value
+      "days": "int",  # Days involved
+      "day_grow": "decimal(18,10)",  # Daily growth rate
+      "discount": "decimal(18,10)",  # Discount rate
+    }

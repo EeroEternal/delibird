@@ -9,7 +9,7 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 from delibird.database import db, insert_list, table_by_arrow, table_exist
-from delibird.mock import gen_dict, gen_dict_list, gen_list_list, schema_from_dict
+from delibird.mock import gen_dict, gen_dict_list, gen_list_list, schema_from_dict, gen_dict_one
 from delibird.util import show, calculate_size
 
 
@@ -70,9 +70,6 @@ def write_parquet(filepath, columns, row_number, batch_size=1024 * 1024):
     # arrow schema
     arrow_schema = schema_from_dict(columns)
 
-    # generate data as dict
-    # dict_list = gen_dict_list(columns, row_number, batch_size)
-
     # check file exist
     path = Path(filepath)
 
@@ -100,13 +97,6 @@ def write_parquet(filepath, columns, row_number, batch_size=1024 * 1024):
             )
             writer.write_batch(batch)
 
-            # check if write finish
-            # if offset + batch_size > length:
-            # break
-
-            # refresh offset
-            # offset += batch_size
-
     show('write parquet finished')
     return True
 
@@ -121,15 +111,17 @@ def write_directory(directory, columns, row_number, batch_size=1024 * 1024):
         batch_size (int): write batch size
     """
     # adjust a reasonable batch_size which would not cause an OutOfMemoryError
-    sample_dict_list = gen_dict(columns, 1)
-    safe_batch_size = calculate_size(sample_dict_list, min(row_number, batch_size))
+    sample = gen_dict_one(columns)
+
+    # calculate suitable size for each batch
+    suit_size = calculate_size(sample, min(row_number, batch_size))
 
     with Pool(processes=cpu_count()) as pool:
         # multiprocess starmap
         # init batch number list
-        record_list = [safe_batch_size for _ in range(row_number // safe_batch_size)]
-        if row_number % safe_batch_size:
-            record_list.append(row_number % safe_batch_size)
+        record_list = [suit_size for _ in range(row_number // suit_size)]
+        if row_number % suit_size:
+            record_list.append(row_number % suit_size)
 
         # map write
         pool.starmap(batch_write, zip(repeat(columns), repeat(directory), record_list))

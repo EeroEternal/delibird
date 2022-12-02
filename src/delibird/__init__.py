@@ -1,5 +1,5 @@
 """delibird init file."""
 
-from .util import show
+from delibird import util
 
-__all__ = ["show"]
+__all__ = ["util"]

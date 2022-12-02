@@ -2,7 +2,7 @@
 
 import pyarrow as pa
 
-from .datatype import decimal_parse, timestamp_parse
+from .parser import decimal_parse, timestamp_parse
 
 
 def schema_from_dict(schema_dict):

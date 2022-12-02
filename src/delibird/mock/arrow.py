@@ -5,7 +5,7 @@ from random import randint, uniform
 import pyarrow as pa
 
 from delibird.mock.code import china_code
-from delibird.mock.datatype import decimal_parse, timestamp_parse
+from delibird.mock.parser import decimal_parse, timestamp_parse
 from delibird.mock.decimal import random_decimal
 from delibird.mock.gen import map_date
 from delibird.mock.schema import type_map

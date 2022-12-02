@@ -1,6 +1,5 @@
 """Generate data."""
 
-
 from itertools import repeat
 from multiprocessing import cpu_count
 from multiprocessing.pool import Pool
@@ -8,28 +7,31 @@ from multiprocessing.pool import Pool
 from .map import map_value
 
 
-def gen_dict_one(columns):
+def gen_dict_one(schema):
     """Generate one dict from column's.
 
     Args:
-        columns (dict): column's define
+        schema (dict): column's schema. e.g {"sec_code":"string", "date":"date"}
 
     Returns:
         dict: generate dict
 
     """
+    # new dict for map result
     dict_value = {}
-    for col in columns:
-        dict_value[col] = map_value(columns[col])
+
+    # item is schema's key, schema is a dict type
+    for item in schema:
+        dict_value[item] = map_value(schema[item])
 
     return dict_value
 
 
-def gen_dict_seq(columns, count, chunk_size=1024):
+def gen_dict_seq(schema, count, chunk_size=1024):
     """Generate iterator use generator.
 
     Args:
-        columns (dict): column's define
+        schema (dict): column's schema
         count (int): number of list
         chunk_size (int, optional): chunk size. Defaults to 1024.
 
@@ -42,16 +44,16 @@ def gen_dict_seq(columns, count, chunk_size=1024):
         actual_chunk_size = min(chunk_size, count - i)
 
         # generate data
-        dict_data = gen_dict(columns, actual_chunk_size)
+        dict_data = gen_dict(schema, actual_chunk_size)
 
         yield dict_data
 
 
-def gen_dict_list(columns, count, batch_size, chunk_size=None):
+def gen_dict_list(schema, count, batch_size, chunk_size=None):
     """Generate dict type list.
 
     Args:
-        columns (dict): column's define. e.g {"sec_code":"string, "date":"date"}
+        schema (dict): column's schema. e.g {"sec_code":"string, "date":"date"}
         count (int): numbers of list
         chunk_size (int, optional): chunk size. Default None
 
@@ -76,7 +78,7 @@ def gen_dict_list(columns, count, batch_size, chunk_size=None):
 
         with Pool(processes=cores) as pool:
             result = pool.map_async(
-                gen_dict_one, repeat(columns, sub_count), chunksize=chunk_size
+                gen_dict_one, repeat(schema, sub_count), chunksize=chunk_size
             ).get()
 
         # check if write finish
@@ -115,11 +117,11 @@ def gen_list_list(engine, columns, count):
     return list_data
 
 
-def gen_dict(columns, count):
+def gen_dict(schema, count):
     """Generate dict.
 
     Args:
-        columns (dict): column's define. e.g {"sec_code":"string, "date":"date"}
+        schema (dict): column's schema. e.g {"sec_code":"string, "date":"date"}
         count (int): numbers of list
 
     Returns:
@@ -128,6 +130,6 @@ def gen_dict(columns, count):
     """
     dict_list = []
     for _ in range(0, count):
-        dict_list.append(gen_dict_one(columns))
+        dict_list.append(gen_dict_one(schema))
 
     return dict_list

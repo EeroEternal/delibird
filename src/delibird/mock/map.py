@@ -8,7 +8,7 @@ from magicbag import (
     prefix_check,
     random_date,
     random_decimal,
-    random_int,
+    random_fixed_int,
     random_timestamp,
 )
 
@@ -50,7 +50,7 @@ def map_int(type_name):
     fix_length = parse(type_name)
 
     if fix_length:
-        return random_int(fix_length)
+        return random_fixed_int(fix_length)
 
     # default int is between 0 and 10000
     return random.randint(0, 10000)

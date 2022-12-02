@@ -1,4 +1,4 @@
-"""Check database or table if exist."""
+"""Check database or table if existed."""
 
 
 def check_database(conn, database_name):
@@ -25,7 +25,7 @@ def check_database(conn, database_name):
 
 
 def table_exist(conn, table_name):
-    """Check table if exist.
+    """Check table if existed.
 
     Args:
         conn (db.connection): database connection handler

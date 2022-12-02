@@ -2,7 +2,7 @@
 
 import pyarrow as pa
 
-from .parser import decimal_parse, timestamp_parse
+from .parser import parse
 
 
 def schema_from_dict(schema_dict):
@@ -40,12 +40,12 @@ def type_map(type_str):
 
     # decimal like : decimal(10,5)
     if type_str.startswith("decimal"):
-        precision, scale = decimal_parse(type_str)
+        precision, scale = parse(type_str)
         return pa.decimal128(precision, scale)
 
-    # timestampe like: timestample(unit='s',tz='Asia/Shanghai')
+    # timestamp like: timestamp(unit='s',tz='Asia/Shanghai')
     if type_str.startswith("timestamp"):
-        unit, timezone = timestamp_parse(type_str)
+        unit, timezone = parse(type_str)
         return pa.timestamp(unit, tz=timezone)
 
     return maps[type_str]

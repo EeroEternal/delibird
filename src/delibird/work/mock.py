@@ -10,7 +10,7 @@ import pyarrow.parquet as pq
 
 from delibird.database import db, insert_list, table_by_arrow, table_exist
 from delibird.mock import gen_dict, gen_dict_list, gen_list_list, schema_from_dict
-from delibird.util import show, simple_batch_size
+from delibird.util import show, calculate_size
 
 
 def write_table(engine, dsn, table_name, schema, row_number):
@@ -89,9 +89,9 @@ def write_parquet(filepath, columns, row_number, batch_size=1024 * 1024):
         for dict_list in gen_dict_list(columns, row_number, batch_size):
             # count batch size
             # if offset + batch_size > length:
-                # count = length - offset
+            # count = length - offset
             # else:
-                # count = batch_size
+            # count = batch_size
 
             # write batch
             batch = pa.RecordBatch.from_pylist(
@@ -102,7 +102,7 @@ def write_parquet(filepath, columns, row_number, batch_size=1024 * 1024):
 
             # check if write finish
             # if offset + batch_size > length:
-                # break
+            # break
 
             # refresh offset
             # offset += batch_size
@@ -122,8 +122,8 @@ def write_directory(directory, columns, row_number, batch_size=1024 * 1024):
     """
     # adjust a reasonable batch_size which would not cause an OutOfMemoryError
     sample_dict_list = gen_dict(columns, 1)
-    safe_batch_size = simple_batch_size(sample_dict_list, min(row_number, batch_size))
-    
+    safe_batch_size = calculate_size(sample_dict_list, min(row_number, batch_size))
+
     with Pool(processes=cpu_count()) as pool:
         # multiprocess starmap
         # init batch number list
@@ -159,7 +159,6 @@ def batch_write(columns, directory, record_number):
     # init file name and parquet writer
     file_name = uuid.uuid4().hex + ".parquet"
     with pq.ParquetWriter(root / file_name, schema=arrow_schema) as writer:
-
         # write to parquet file
         record_batch = pa.RecordBatch.from_pylist(mapping=dict_list, schema=arrow_schema)
         writer.write_batch(record_batch)

@@ -7,48 +7,85 @@ from multiprocessing import cpu_count
 import psutil
 
 
-def avaliable_memory():
-    """Avaliable memory"""
+def available_memory():
+    """Check available memory.
+
+    Returns:
+        int: available memory
+    """
     pc_mem = psutil.virtual_memory()
-    return pc_mem.available
+
+    if pc_mem:
+        return pc_mem.available
+
+    return 0
 
 
-def analysis_data_memory(example_dict_list, virtual_size):
-    """Analysis memory cost of list of dict"""
-    example_dict = example_dict_list[0]
-    virtual_dict_list = [example_dict for i in range(virtual_size)]
-    list_mem = sys.getsizeof(virtual_dict_list)
-    dict_mem = deep_getsizeof_dict(example_dict)
-    return list_mem + (dict_mem * virtual_size), dict_mem
+def calculate_memory(list_data, length):
+    """Analysis memory cost of list of dict.
+
+    Args:
+        list_data (list): list of dict
+        length (int): length of list
+    Returns:
+        int: memory cost of list of dict
+    """
+    sample = list_data[0]
+
+    dict_list = [sample for i in range(length)]
+
+    list_mem = sys.getsizeof(dict_list)
+    dict_mem = deep_size(sample)
+
+    return list_mem + (dict_mem * length), dict_mem
 
 
-def deep_getsizeof_dict(example_dict):
-    """Analysis memory cost of dict"""
-    dict_mem = sys.getsizeof(example_dict)
-    member_mem = 0
-    for k in example_dict.keys():
-        member_mem += sys.getsizeof(k)
-        member_mem += sys.getsizeof(example_dict[k])
-    return dict_mem + member_mem
+def deep_size(sample):
+    """Deep calculate size of dict.
+
+    Args:
+        sample (dict): sample dict
+    Return:
+        int: size of dict
+    """
+    # get sample size
+    sample_size = sys.getsizeof(sample)
+
+    # calculate all  size
+    all_size = 0
+
+    for k in sample:
+        all_size += sys.getsizeof(k)
+        all_size += sys.getsizeof(sample[k])
+
+    return sample_size + all_size
 
 
-def simple_batch_size(example_dict_list, virtual_batch_size):
-    """Analysis a safe pool size simply"""
+def calculate_size(list_data, batch_size):
+    """Analysis a safe pool size simply.
+
+    Args:
+        list_data (list): list of dict
+        batch_size (int): batch size
+
+    Returns:
+        int: safe pool size
+    """
     mem_adjust_factor = 1.2
     heap_pointer_mem = 8
     mem_saver_factor = 0.9
 
-    avaliable_mem = avaliable_memory()
+    available_mem = available_memory()
 
-    # simply calsulate a safe batch size which would't cause OutOfMemoryErro
-    safe_batch_mem = math.ceil(avaliable_mem * mem_saver_factor / cpu_count())
+    # simply calculate a safe batch size which wouldn't cause OutOfMemoryErro
+    safe_batch_mem = math.ceil(available_mem * mem_saver_factor / cpu_count())
 
     # analysis size of sample list and single data in the sample list
-    example_mem, single_data_mem = analysis_data_memory(example_dict_list, virtual_batch_size)
+    example_mem, single_data_mem = calculate_memory(list_data, batch_size)
 
     # memory not overflow, just return old size
-    if ((example_mem * mem_adjust_factor) < safe_batch_mem):
-        return virtual_batch_size
+    if (example_mem * mem_adjust_factor) < safe_batch_mem:
+        return batch_size
 
     # calculate a new size
     # 8: heap_pointer_mem
@@ -56,6 +93,7 @@ def simple_batch_size(example_dict_list, virtual_batch_size):
     # old_mem - offset_size * (single_data_mem + 8) = safe_new_mem
     # old_mem - safe_new_mem = offset_size * (single_data_mem + 8)
     # offset_size = (old_mem - safe_new_mem) / (single_data_mem + 8)
-    offset_batch_size = math.ceil((example_mem - safe_batch_mem / mem_adjust_factor) / (single_data_mem + heap_pointer_mem))
-    safe_batch_size = virtual_batch_size - offset_batch_size
-    return safe_batch_size 
+    offset_batch_size = math.ceil(
+        (example_mem - safe_batch_mem / mem_adjust_factor) / (single_data_mem + heap_pointer_mem))
+    safe_batch_size = batch_size - offset_batch_size
+    return safe_batch_size

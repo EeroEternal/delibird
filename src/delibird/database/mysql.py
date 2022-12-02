@@ -2,7 +2,7 @@
 
 
 def dsn_to_args(dsn, args):
-    """split msyql connect dsn to params dict"""
+    """split mysql connect dsn to params dict"""
     slash_split = dsn.split("/")
     host_port = slash_split[2]
     db_others = slash_split[3]
@@ -26,5 +26,5 @@ def dsn_to_args(dsn, args):
         elif key == "password":
             args["password"] = other_split[1]
             count += 1
-        if (count >= 2):
+        if count >= 2:
             break

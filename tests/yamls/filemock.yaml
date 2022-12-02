@@ -10,12 +10,12 @@ mocks:
       # stock code as a type
       "sec_code": "int(6)",  # "600001"
       "date": "date",  # 2022-08-24
-      "close": "float",  # 16.87
+      "close": "float(-100,1000)",  # 16.87. default is 0 to 10000
       "open": "float",  # 16.65
-      "high": "float",  # 16.95
+      "high": "float",  # 16.87
       "low": "float",  # 16.55
       "hold": "decimal(10,5)",  # 123.25515
-      "time": "map_timestamp(unit=s,tz=Asia/Shanghai)",
+      "time": "timestamp(unit=s,tz=Asia/Shanghai)",
       "datetime": "datetime(tz=Asia/Shanghai)",
       "volume": "int(7)",  # 1530231
       "amount": "int",  # 153023. default is six digits

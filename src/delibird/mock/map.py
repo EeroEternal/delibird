@@ -1,9 +1,14 @@
 """Type map for mock objects."""
+
 from ast import literal_eval
+from random import randint, random
 
-from magicbag import prefix_check, random_date, random_decimal, random_timestamp
+from magicbag import (
+    prefix_check, random_date,
+    random_decimal, random_timestamp, random_int
+)
 
-from delibird.mock.parser import decimal_parse, timestamp_parse
+from delibird.mock.parser import parse
 
 from .parser import meta_types
 
@@ -29,7 +34,56 @@ def map_value(type_name):
     return None
 
 
-def map_date():
+def map_int(type_name):
+    """Generate random int.
+
+    if type_name is "int", return random int between 0 and 10000
+    if type_name is "int(10)", return random fixed length int with 10 digits
+
+    Returns:
+        int: random int
+    """
+    fix_length = parse(type_name)
+
+    if fix_length:
+        return random_int(fix_length)
+
+    # default int is between 0 and 10000
+    return randint(0, 10000)
+
+
+def map_string(_type_name):
+    """Generate random string.
+
+    Returns:
+        str: random string
+    """
+    # todo: generate random string
+    return
+
+
+def map_float(type_name):
+    """Generate random float with precision.
+
+    Args:
+        type_name (str): float type. e.g "float(10)"
+
+    Returns:
+        float: random float
+
+    """
+    start, end = parse(type_name)
+
+    # if not precision, return random float
+    if start is None:
+        start = 0
+        end = 10000
+
+    # return random float between start and end
+    return start + (end - start) * random()
+
+
+def map_date(_type_name):
     """Generate random date.
 
     calendar date (year, month, day). e.g 2020-01-01
@@ -47,7 +101,7 @@ def map_datetime(type_name):
         type_name (str): datetime type. e.g "datetime(s,Asia/Shanghai)"
 
     """
-    unit, timezone = timestamp_parse(type_name)
+    unit, timezone = parse(type_name)
 
     return random_timestamp(unit, timezone)
 
@@ -63,7 +117,7 @@ def map_decimal(type_name):
 
     """
     # python no scale define
-    precision, scale = decimal_parse(type_name)
+    precision, scale = parse(type_name)
 
     # generate random decimal
     return random_decimal(precision, scale)
@@ -76,6 +130,6 @@ def map_timestamp(type_name):
         type_name (str): timestamp type. e.g "timestamp(s,Asia/Shanghai)"
 
     """
-    unit, timezone = timestamp_parse(type_name)
+    unit, timezone = parse(type_name)
 
     return random_timestamp(unit, timezone)

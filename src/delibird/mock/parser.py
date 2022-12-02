@@ -4,8 +4,7 @@ from ast import literal_eval
 
 from magicbag import prefix_check
 
-meta_types = ("int", "string", "float", "date", "datetime",
-              "decimal", "timestamp")
+meta_types = ("int", "string", "float", "date", "datetime", "decimal", "timestamp")
 
 
 def parse(type_name):

@@ -4,12 +4,9 @@ from random import randint, uniform
 
 import pyarrow as pa
 
-from delibird.mock.code import china_code
-from delibird.mock.parser import decimal_parse, timestamp_parse
-from delibird.mock.decimal import random_decimal
-from delibird.mock.gen import map_date
-from delibird.mock.schema import type_map
-from delibird.mock.time import now_timestamp
+from .map import map_date
+from .schema import type_map
+from .time import now_timestamp
 
 
 def gen_arrays_seq(columns, count, chunk_size=1024):

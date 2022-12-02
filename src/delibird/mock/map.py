@@ -1,11 +1,15 @@
 """Type map for mock objects."""
 
+import random
+import string
 from ast import literal_eval
-from random import randint, random
 
 from magicbag import (
-    prefix_check, random_date,
-    random_decimal, random_timestamp, random_int
+    prefix_check,
+    random_date,
+    random_decimal,
+    random_int,
+    random_timestamp,
 )
 
 from delibird.mock.parser import parse
@@ -49,17 +53,25 @@ def map_int(type_name):
         return random_int(fix_length)
 
     # default int is between 0 and 10000
-    return randint(0, 10000)
+    return random.randint(0, 10000)
 
 
-def map_string(_type_name):
+def map_string(type_name):
     """Generate random string.
 
     Returns:
         str: random string
     """
-    # todo: generate random string
-    return
+    max_length = parse(type_name)
+
+    if max_length is None:
+        max_length = 255
+
+    letters = string.ascii_lowercase
+
+    use_length = random.randint(1, max_length)
+
+    return "".join(random.choice(letters) for i in range(use_length))
 
 
 def map_float(type_name):
@@ -80,7 +92,7 @@ def map_float(type_name):
         end = 10000
 
     # return random float between start and end
-    return start + (end - start) * random()
+    return start + (end - start) * random.random()
 
 
 def map_date(_type_name):

@@ -1,10 +1,9 @@
 """Schema for parquet file."""
 
 import pyarrow as pa
-
-from .parser import parse, meta_types
-
 from magicbag import prefix_check
+
+from .parser import meta_types, parse
 
 # database type map to arrow type
 maps = {

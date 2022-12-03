@@ -18,7 +18,8 @@ __all__ = [
     "table_exist",
     "table_by_arrow",
     "create_arrow_schema",
+    "create_table_by_schema",
     "insert_list",
     "insert_arrow_table",
-    "create_table_by_schema"
+    "insert_batch",
 ]

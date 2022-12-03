@@ -50,7 +50,7 @@ class Connection:
     def cursor(self, dict_row_flag=False):
         """Get the cursor of the connection."""
         if self.autocommit is True:
-            if engine == "mysql":
+            if self.engine == "mysql":
                 self._conn.autocommit(True)
             else:
                 self._conn.autocommit = True

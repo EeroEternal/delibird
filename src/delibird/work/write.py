@@ -76,11 +76,13 @@ def write_directory(directory, dsn, table_name, engine="postgresql", batch_size=
     return True
 
 
+# pylint: disable=too-many-arguments
 def range_write_parquet(directory, engine, dsn, schema, table_name, record_range):
     """Write parquet file from database.
 
     Args:
         directory (str): directory name for parquet files
+        engine (str): database engine
         dsn (str): database connection string
         schema (pyarrow.schema): pyarrow schema
         table_name (str): database table name
@@ -95,11 +97,11 @@ def range_write_parquet(directory, engine, dsn, schema, table_name, record_range
     # get record according to record range
     cursor = conn.cursor(dict_row_flag=True)
     index, count = record_range
-    if engine == "postgresql" or engine == "mysql":
+    if engine in ["postgresql", "mysql"]:
         cursor.execute(f"select * from {table_name} limit {count} offset {index * count}")
     elif engine == "oracle":
-        cursor.execute(f"select * from {table_name} where rownum <= {count} "\
-            "and rownum > {index * count}")
+        cursor.execute(f"select * from {table_name} where rownum <= {count} " \
+                       "and rownum > {index * count}")
         cursor.rowfactory = \
             lambda *args: dict(zip([d[0] for d in cursor.description], args))
     records = cursor.fetchall()
@@ -153,7 +155,7 @@ def write_parquet(filepath, dsn, table_name, engine="postgresql", batch_size=102
     # write to parquet file
     with pq.ParquetWriter(filepath, schema) as writer:
         while True:
-            if engine == "postgresql" or engine == "mysql":
+            if engine in ["postgresql", "mysql"]:
                 cursor.execute(
                     f"select * from {table_name} limit {batch_size} offset {offset}"
                 )

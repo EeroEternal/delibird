@@ -87,6 +87,7 @@ def create_arrow_schema(engine, dsn, table_name):
     """Create arrow schema based on table.
 
     Args:
+        engine (str): database engine
         dsn (str): database connect string
         table_name (str): table name
 
@@ -101,7 +102,7 @@ def create_arrow_schema(engine, dsn, table_name):
 
     # set dict cursor
     cursor = conn.cursor(dict_row_flag=True)
-    if engine == "postgresql" or engine == "mysql":
+    if engine in ["postgresql", "mysql"]:
         cursor.execute(f"select * from {table_name} limit 1")
     elif engine == "oracle":
         cursor.execute(f"select * from {table_name} where rownum <= 1")
@@ -114,7 +115,7 @@ def create_arrow_schema(engine, dsn, table_name):
     for col in cursor.description:
         if engine == "postgresql":
             type_list.append(pa.field(col.name, arrow_type(engine, col)))
-        elif engine == "oracle" or engine == "mysql":
+        elif engine in ["oracle", "mysql"]:
             type_list.append(pa.field(col[0], arrow_type(engine, col)))
 
     # create schema
@@ -122,11 +123,10 @@ def create_arrow_schema(engine, dsn, table_name):
 
 
 def parquet_schema(conn, table_name) -> pa.Schema:
-    """Cusor description to parquet schema.
+    """Cursor description to parquet schema.
 
     Args:
-        cursor (db.conn): db-api cursor description.
-                refer to https://peps.python.org/pep-0249/
+        conn (db.connection): database connection
         table_name (str): table name
 
     Returns:
@@ -136,7 +136,7 @@ def parquet_schema(conn, table_name) -> pa.Schema:
     # set dict cursor
     cursor = conn.cursor(dict_row_flag=True)
     engine = conn.engine
-    if engine == "postgresql" or engine == "mysql":
+    if engine in ["postgresql", "mysql"]:
         cursor.execute(f"select * from {table_name} limit 1")
     elif engine == "oracle":
         cursor.execute(f"select * from {table_name} where rownum <= 1")
@@ -159,8 +159,8 @@ def arrow_type(engine, col):
     https://stackoverflow.com/questions/37478323/how-to-programatically-get-table-structure-with-pyscopg2
 
     Args:
-        oid (str): sql type oid
-        cursor (db.cursor): database cursor
+        engine (str): database engine
+        col (tuple): column name and type
 
     Returns:
         pyarrow.DataType: pyarrow type
@@ -324,9 +324,10 @@ def create_table_by_schema(conn, table_name, arrow_schema):
 def sql_schema(engine, schema):
     """Get 'create table' statement based on row group schema.
 
-    create table tablename (id serial primary key, name varchar(255), age int)
+    create table table_name (id serial primary key, name varchar(255), age int)
 
     Args:
+        engine (str): database engine
         schema (pyarrow.Schema): pyarrow schema
 
     """
@@ -345,6 +346,7 @@ def sql_type_map(engine, type_name):
     """Get sql type based on pyarrow type.
 
     Args:
+        engine (str): database engine
         type_name (str): pyarrow type as string
 
     Returns:

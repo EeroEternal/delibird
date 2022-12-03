@@ -157,7 +157,9 @@ class Parser:
             unit, timezone = data.split(",")
 
             # get unit and timezone value .remember remove double quote
-            unit, timezone = unit.split("=")[1].strip(""), timezone.split("=")[1].strip("")
+            unit, timezone = unit.split("=")[1].strip(""), timezone.split("=")[1].strip(
+                ""
+            )
 
             return unit, timezone
         except ValueError:

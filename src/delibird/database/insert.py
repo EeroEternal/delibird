@@ -7,12 +7,12 @@ def insert_arrow_table(table, conn, table_name):
     Args:
         table (pyarrow.Table): parquet row group data
         conn (db.connection): database connection
-        table_name (str): tablename
+        table_name (str): table name
     """
     # batch size for insert to table per time
     batch_size = 25
 
-    # split dataframe to batchs and insert to table
+    # split dataframe to batches and insert to table
     batches = table.to_batches(max_chunksize=batch_size)
 
     for batch in batches:
@@ -21,10 +21,13 @@ def insert_arrow_table(table, conn, table_name):
 
 def gen_columns(engine, data):
     """Gen columns."""
-    if engine == "postgresql" or engine == "mysql":
+    if engine in ["postgresql", "mysql"]:
         return ",".join(["%s"] * len(data))
-    elif engine == "oracle":
+
+    if engine == "oracle":
         return ",".join([":" + key for key in data.keys()])
+
+    return None
 
 
 def insert_list(list_data, conn, table_name):
@@ -60,11 +63,11 @@ def gen_batch_columns(engine, batch):
     Args:
         engine (str); engine
         batch (pyarrow.table.Table): parquet table
-
     """
-    if engine == "postgresql" or engine == "mysql":
+    if engine in ["postgresql", "mysql"]:
         return ",".join(["%s"] * batch.num_columns)
-    elif engine == "oracle":
+
+    if engine == "oracle":
         column_datas = []
         col_index = 1
         # pylint:disable=unused-variable
@@ -72,6 +75,8 @@ def gen_batch_columns(engine, batch):
             column_datas.append(f":VAL_{col_index}")
             col_index += 1
         return ",".join(column_datas)
+
+    return None
 
 
 def insert_batch(batch, conn, table_name):
@@ -108,6 +113,7 @@ def table_values(engine, batch):
     """Change batch data to list of values.
 
     Args:
+        engine (str): engine
         batch (pyarrow.RecordBatch): batch data
 
     Returns:
@@ -116,20 +122,23 @@ def table_values(engine, batch):
     values = []
     # row tuple
     for i in range(0, batch.num_rows):
-        if engine == "postgresql" or engine == "mysql":
+        row = None
+        if engine in ["postgresql", "mysql"]:
             row = ()
 
             # add data to row tuple
             for j in range(0, batch.num_columns):
                 row += (batch.column(j)[i].as_py(),)
-        elif engine == "oracle":
-            row = dict()
+
+        if engine == "oracle":
+            row = {}
 
             # put data to row dict
             for j in range(0, batch.num_columns):
                 row[f"VAL_{j + 1}"] = batch.column(j)[i].as_py()
 
         # append row to list
-        values.append(row)
+        if row:
+            values.append(row)
 
     return values

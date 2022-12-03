@@ -16,6 +16,7 @@ def read_parquet(filepath, dsn, table_name, engine="postgresql"):
         filepath (str): filename with path
         dsn (str): data source name
         table_name (str): table name
+        engine (str): database engine
     """
     # check file exist
     path = Path(filepath)
@@ -51,6 +52,7 @@ def read_row_group(row_group, engine, dsn, table_name, batch_size=1024 * 100):
 
     Args:
         row_group (pyarrow.Table): parquet row group
+        engine (str): database engine
         dsn (str): data source name
         table_name (str): table name
         batch_size (int): batch size
@@ -81,18 +83,19 @@ def read_row_group(row_group, engine, dsn, table_name, batch_size=1024 * 100):
 
 
 def read_directory(directory, dsn, table_name, engine="postgresql"):
-    """Read parquet file and write to database parrallel.
+    """Read parquet file and write to database parallel.
 
     Args:
         directory (str): directory name
         dsn (str): data source name
         table_name (str): table name
+        engine (str): database engine
     """
     # check directory exist
     path = Path(directory)
     if path.exists() is False:
         print(f"directory not exist: {directory}")
-        return None
+        return False
 
     if path.is_dir() is False:
         print(f"not a directory: {directory}")
@@ -105,7 +108,7 @@ def read_directory(directory, dsn, table_name, engine="postgresql"):
         return None
 
     # check table exist
-    create_table_if_not_exist(files[0], engine, dsn, table_name)
+    create_table_if_not_exist(str(files[0]), engine, dsn, table_name)
 
     # read parquet file
     with Pool(processes=cpu_count()) as pool:
@@ -118,8 +121,10 @@ def create_table_if_not_exist(filepath, engine, dsn, table_name):
     """Create table if it's not existed
 
     Args:
+        filepath (str): filename with path
+        engine (str): database engine
+        dsn (str): data source name
         table_name (str): table name
-        filepath (str): parquet file path
     """
     # connection
     conn = db.connect(engine, dsn)
@@ -144,3 +149,5 @@ def create_table_if_not_exist(filepath, engine, dsn, table_name):
 
     # clean up
     conn.close()
+
+    return True

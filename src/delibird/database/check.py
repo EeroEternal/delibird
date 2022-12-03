@@ -40,7 +40,8 @@ def table_exist(conn, table_name):
     elif engine == "oracle":
         sql = f"select * from user_tables WHERE table_name = '{table_name.upper()}'"
     elif engine == "mysql":
-        sql = f"SELECT table_name FROM information_schema.tables WHERE table_schema = (SELECT DATABASE()) and table_name = '{table_name}'"
+        sql = f"SELECT table_name FROM information_schema.tables \
+                    WHERE table_schema = (SELECT DATABASE()) and table_name = '{table_name}'"
     with conn.cursor() as cur:
         # check table if exist
         cur.execute(sql)

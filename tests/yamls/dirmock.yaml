@@ -10,7 +10,7 @@ mocks:
       "id": "int(6)", # number with six digits
       "editor_id": "string",
       "create_time": "datetime",
-      "update_time": "datetime",
+      "update_time": "datetime(tz=Asia/Shanghai)",
       "data_source": "string",
       "origin_db": "string(10)", # origin database.max length is 10
       "sec_code": "code", # inner code

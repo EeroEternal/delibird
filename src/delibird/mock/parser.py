@@ -176,7 +176,7 @@ class Parser:
         if len(self.type_name) == 8:
             return "UTC"
 
-        # get "tz='Asia/Shanghai'" from "datetime(tz='Asia/Shanghai')"
+        # get "tz='Asia/Shanghai'" from "datetime(tz=Asia/Shanghai)"
         data = self.type_name.split("(")[1].split(")")[0]
 
         # remove bracket in "'Asia/Shanghai'"

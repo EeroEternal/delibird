@@ -1,7 +1,5 @@
 """Parse data type from file."""
 
-from ast import literal_eval
-
 from magicbag import prefix_check
 
 meta_types = ("int", "string", "float", "date", "datetime", "decimal", "timestamp")
@@ -16,160 +14,172 @@ def parse(type_name):
         tuple(str): argument. e.g "10,5"
     """
     # check literal start with category prefix
-    # result is "decimal"
+    # result is "decimal", not "decimal(10,5)"
     result = prefix_check(type_name, meta_types)
 
     if result[0]:
-        # parse argument by result
-        return literal_eval(f"{result[1]}_parse")(type_name)
+        # call parser function by type name
+
+        # parser is Class Parser's instance
+        parser = Parser(type_name)
+
+        # get parser function by type name
+        func = getattr(parser, f"parse_{result[1]}")
+
+        # call parser function
+        return func()
 
     return None
 
 
-def int_parse(type_name):
-    """Parse int type, get fix length.
+class Parser:
+    """Parse data type from file."""
 
-    Args:
-        type_name (str): int type, e.g "int(10)"
-    Returns:
-        int: fix length
-    """
-    if not type_name.startswith("int"):
-        return None
+    def __init__(self, type_name):
+        """Init parser.
 
-    if len(type_name) == 3:
-        return None
+        Args:
+            type_name (str): data type name define
+        """
+        self.type_name = type_name
 
-    # get "10" from "int(10)" and return
-    try:
-        return int(type_name.split("(")[1].split(")")[0])
-    except ValueError:
-        return None
+    def parse_int(self):
+        """Parse int type, get fix length.
 
+        int(10) means fix length 10, return 10
+        int return None
 
-def float_parse(type_name):
-    """Parse float str, get precision.
+        Returns:
+            int: fix length
+        """
+        if not self.type_name.startswith("int"):
+            return None
 
-    Args:
-        type_name (str): float str, e.g "float(10)"
-    Returns:
-        int,int: start, end
-    """
-    if not type_name.startswith("float"):
-        return None
+        if len(self.type_name) == 3:
+            return None
 
-    # check if it has range
-    if len(type_name) == 5:
-        return None, None
+        # get "10" from "int(10)" and return
+        try:
+            return int(self.type_name.split("(")[1].split(")")[0])
+        except ValueError:
+            return None
 
-    # get "-10, 100" from "float(-10, 100)"
-    try:
-        content = type_name.split("(")[1].split(")")[0]
+    def parse_float(self):
+        """Parse float str, get precision.
 
-        # get start and end
-        start, end = content.split(",")
+        float(100,1000) return 100, 1000
+        float return None, None
 
-        # return as integer
-        return int(start), int(end)
-    except ValueError:
-        return None, None
+        Returns:
+            int,int: start, end
+        """
+        if not self.type_name.startswith("float"):
+            return None
 
+        # check if it has range
+        if len(self.type_name) == 5:
+            return None, None
 
-def string_parse(type_name):
-    """Parse string str, get float precision.
+        # get "-10, 100" from "float(-10, 100)"
+        try:
+            content = self.type_name.split("(")[1].split(")")[0]
 
-    Args:
-        type_name (str): string str, e.g "string(10)"
-    Returns:
-        int: string max length
-    """
-    if not type_name.startswith("string"):
-        return None
+            # get start and end
+            start, end = content.split(",")
 
-    if len(type_name) == 6:
-        return None
+            # return as integer
+            return int(start), int(end)
+        except ValueError:
+            return None, None
 
-    # get "10" from "float10"
-    try:
-        return int(type_name[5:].strip())
-    except ValueError:
-        return None
+    def parse_string(self):
+        """Parse string str, get float precision.
 
+        string(100) return max length 100
+        string return None
 
-def decimal_parse(type_name):
-    """Parse decimal str, get precision and scale.
+        Returns:
+            int: string max length
+        """
+        if not self.type_name.startswith("string"):
+            return None
 
-    Args:
-        type_name (str): decimal str, e.g "decimal(10,5)"
-    Returns:
-        int,int: precision, scale
-    """
-    if not type_name.startswith("decimal"):
-        return None
+        if len(self.type_name) == 6:
+            return None
 
-    try:
-        # get "10,5" from "decimal(10,5)"
-        data = type_name.split("(")[1].split(")")[0]
+        # get "10" from "float10"
+        try:
+            return int(self.type_name[5:].strip())
+        except ValueError:
+            return None
 
-        # get precision and scale
-        precision_str, scale_str = data.split(",")
+    def parse_decimal(self):
+        """Parse decimal str, get precision and scale.
 
-        return int(precision_str), int(scale_str)
-    except ValueError:
-        return None, None
+        decimal(10,5) return 10, 5
+        decimal return None, None
 
+        Returns:
+            int,int: precision, scale
+        """
+        if not self.type_name.startswith("decimal"):
+            return None
 
-def timestamp_parse(type_name):
-    """Parse timestamp str, get unit and timezone.
+        try:
+            # get "10,5" from "decimal(10,5)"
+            data = self.type_name.split("(")[1].split(")")[0]
 
-    Args:
-        type_name (str): timestamp str, e.g "timestamp(unit=s,tz=Asia/Shanghai)"
-    Returns:
-        str,str: unit, timezone
-    """
-    if not type_name.startswith("timestamp"):
-        return None
+            # get precision and scale
+            precision_str, scale_str = data.split(",")
 
-    # if no argument, return default value
-    if len(type_name) == 9:
-        return "s", "UTC"
+            return int(precision_str), int(scale_str)
+        except ValueError:
+            return None, None
 
-    try:
-        # get "unit='s',tz='Asia/Shanghai'" from "timestamp(unit='s',tz='Asia/Shanghai')"
-        data = type_name.split("(")[1].split(")")[0]
+    def parse_timestamp(self):
+        """Parse timestamp str, get unit and timezone.
 
-        # get unit and timezone
-        unit, timezone = data.split(",")
+        Returns:
+            str,str: unit, timezone
+        """
+        if not self.type_name.startswith("timestamp"):
+            return None
 
-        # remove bracket in "'s'" "'Asia/Shanghai'"
+        # if no argument, return default value
+        if len(self.type_name) == 9:
+            return "s", "UTC"
 
-        unit, timezone = unit.split("=")[1].strip(""), timezone.split("=")[1].strip("")
+        try:
+            # get "unit='s',tz='Asia/Shanghai'" from "timestamp(unit=s,tz=Asia/Shanghai)"
+            data = self.type_name.split("(")[1].split(")")[0]
 
-        return unit, timezone
-    except ValueError:
-        return None, None
+            # get unit and timezone
+            unit, timezone = data.split(",")
 
+            # get unit and timezone value .remember remove double quote
+            unit, timezone = unit.split("=")[1].strip(""), timezone.split("=")[1].strip("")
 
-def datetime_parse(type_name):
-    """Parse datetime str, get unit and timezone.
+            return unit, timezone
+        except ValueError:
+            return None, None
 
-    Args:
-        type_name (str): datetime str, e.g "datetime(tz=Asia/Shanghai)"
-    Returns:
-        str: timezone
-    """
-    if not type_name.startswith("datetime"):
-        return None
+    def parse_datetime(self):
+        """Parse datetime str, get unit and timezone.
 
-    # if no argument, return default value
-    if len(type_name) == 8:
-        return "UTC"
+        Returns:
+            str: timezone
+        """
+        if not self.type_name.startswith("datetime"):
+            return None
 
-    # get "tz='Asia/Shanghai'" from "datetime(tz='Asia/Shanghai')"
-    data = type_name.split("(")[1].split(")")[0]
+        # if no argument, return default value
+        if len(self.type_name) == 8:
+            return "UTC"
 
-    # remove bracket in "'Asia/Shanghai'"
+        # get "tz='Asia/Shanghai'" from "datetime(tz='Asia/Shanghai')"
+        data = self.type_name.split("(")[1].split(")")[0]
 
-    timezone = data.split("=")[1].strip("")
+        # remove bracket in "'Asia/Shanghai'"
+        timezone = data.split("=")[1].strip("")
 
-    return timezone
+        return timezone

@@ -17,20 +17,28 @@ def calculate_size(list_data, batch_size):
     Returns:
         int: safe pool size
     """
-    available = psutil.virtual_memory()
+    # get available memory
+    # [Memory](https://psutil.readthedocs.io/en/latest/)
+    # available: the memory that can be given instantly to processes
+    # without the system going into swap
+    available = psutil.virtual_memory().available
+
+    # check if None
+    if not available:
+        return batch_size
 
     # safe memory must less than available memory. "0.8" is a magic number
     safe_memory = math.ceil(available * 0.8 / cpu_count())
 
     # calculate size of list_data with batch_size
     # batch_size is in "getsizeof"
-    possible_memory = sys.getsizeof([list_data] * batch_size)
+    possible_memory = sys.getsizeof(list_data) * batch_size
 
     # if possible_memory is less than safe_memory, return batch_size
     if possible_memory < safe_memory:
         return batch_size
 
-    # calculate a safe batch size. "0.8" is a magic number
-    safe_batch_size = math.ceil(safe_memory / sys.getsizeof(list_data)) * 0.8
+    # calculate a safe batch size. "0.6" is a magic number
+    safe_batch_size = math.ceil(safe_memory / sys.getsizeof(list_data)) * 0.6
 
-    return safe_batch_size
+    return int(safe_batch_size)

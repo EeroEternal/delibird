@@ -11,5 +11,5 @@ pycodestyle==2.10.0
 oracledb==1.1.1
 PyMySQL==1.0.2
 setuptools==65.6.3
-magicbag==0.0.18
+magicbag==0.0.19
 psutil>=5.8.0

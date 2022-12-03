@@ -2,7 +2,7 @@
 
 import random
 import string
-from ast import literal_eval
+import pytz
 
 from magicbag import (
     prefix_check,
@@ -31,117 +31,118 @@ def map_value(type_name):
 
     if result[0]:
         # call generate function by type name
-        # use literal_eval safe convert str to int, float, etc.
-        return literal_eval(f"map_{result[1]}")(type_name)
+
+        # mapper is Class Mapper's instance
+        mapper = Mapper(type_name)
+
+        # get generate function by type name
+        func = getattr(mapper, f"map_{result[1]}")
+
+        # call generate function
+        return func()
 
     # not match any type, return None
     return None
 
 
-def map_int(type_name):
-    """Generate random int.
+class Mapper:
+    """Map type to value."""
 
-    if type_name is "int", return random int between 0 and 10000
-    if type_name is "int(10)", return random fixed length int with 10 digits
+    def __init__(self, type_name):
+        """Init.
 
-    Returns:
-        int: random int
-    """
-    fix_length = parse(type_name)
+        Args:
+            type_name (str): type name. e.g "int(10)"
+        """
+        self.type_name = type_name
 
-    if fix_length:
-        return random_fixed_int(fix_length)
+    def map_int(self):
+        """Generate random int.
 
-    # default int is between 0 and 10000
-    return random.randint(0, 10000)
+        if type_name is "int", return random int between 0 and 10000
+        if type_name is "int(10)", return random fixed length int with 10 digits
 
+        Returns:
+            int: random int
+        """
+        fix_length = parse(self.type_name)
 
-def map_string(type_name):
-    """Generate random string.
+        if fix_length:
+            return random_fixed_int(fix_length)
 
-    Returns:
-        str: random string
-    """
-    max_length = parse(type_name)
+        # default int is between 0 and 10000
+        return random.randint(0, 10000)
 
-    if max_length is None:
-        max_length = 255
+    def map_string(self):
+        """Generate random string.
 
-    letters = string.ascii_lowercase
+        Returns:
+            str: random string
+        """
+        max_length = parse(self.type_name)
 
-    use_length = random.randint(1, max_length)
+        if max_length is None:
+            max_length = 255
 
-    return "".join(random.choice(letters) for i in range(use_length))
+        letters = string.ascii_lowercase
 
+        use_length = random.randint(1, max_length)
 
-def map_float(type_name):
-    """Generate random float with precision.
+        return "".join(random.choice(letters) for i in range(use_length))
 
-    Args:
-        type_name (str): float type. e.g "float(10)"
+    def map_float(self):
+        """Generate random float with precision.
 
-    Returns:
-        float: random float
+        Returns:
+            float: random float
+        """
+        start, end = parse(self.type_name)
 
-    """
-    start, end = parse(type_name)
+        # if not precision, return random float
+        if start is None:
+            start = 0
+            end = 10000
 
-    # if not precision, return random float
-    if start is None:
-        start = 0
-        end = 10000
+        # return random float between start and end
+        return start + (end - start) * random.random()
 
-    # return random float between start and end
-    return start + (end - start) * random.random()
+    @staticmethod
+    def map_date():
+        """Generate random date.
 
+        Returns:
+            datetime.date: random date
+        """
+        return random_date()
 
-def map_date(_type_name):
-    """Generate random date.
+    def map_datetime(self):
+        """Generate datetime with unit and timezone.
 
-    calendar date (year, month, day). e.g 2020-01-01
+        Returns:
+            datetime.datetime: random datetime
+        """
+        unit, timezone = parse(self.type_name)
 
-    Returns:
-        datetime.date: random date
-    """
-    return random_date()
+        return random_timestamp(unit, timezone)
 
+    def map_decimal(self):
+        """Generate decimal with precision and scale.
 
-def map_datetime(type_name):
-    """Generate datetime with unit and timezone.
+        Returns:
+            Decimal : decimal value
+        """
+        # python no scale define
+        precision, scale = parse(self.type_name)
 
-    Args:
-        type_name (str): datetime type. e.g "datetime(s,Asia/Shanghai)"
+        # generate random decimal
+        return random_decimal(precision, scale)
 
-    """
-    unit, timezone = parse(type_name)
+    def map_timestamp(self):
+        """Generate timestamp with unit and timezone."""
+        unit, timezone = parse(self.type_name)
 
-    return random_timestamp(unit, timezone)
+        # check if timezone is str type
+        if not isinstance(timezone, str):
+            raise TypeError("timezone must be str type")
 
-
-def map_decimal(type_name):
-    """Generate decimal with precision and scale.
-
-    Args:
-        type_name (str): decimal type define. e.g "decimal(10,5)"
-
-    Returns:
-        Decimal : decimal value
-
-    """
-    # python no scale define
-    precision, scale = parse(type_name)
-
-    # generate random decimal
-    return random_decimal(precision, scale)
-
-
-def map_timestamp(type_name):
-    """Generate timestamp with unit and timezone.
-
-    Args:
-        type_name (str): timestamp type. e.g "timestamp(s,Asia/Shanghai)"
-
-    """
-    unit, timezone = parse(type_name)
-
-    return random_timestamp(unit, timezone)
+        return random_timestamp(unit, timezone)

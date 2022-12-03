@@ -2,7 +2,6 @@
 
 import random
 import string
-import pytz
 
 from magicbag import (
     prefix_check,
@@ -35,7 +34,7 @@ def map_value(type_name):
         # mapper is Class Mapper's instance
         mapper = Mapper(type_name)
 
-        # get generate function by type name
+        # get generate function by type name. result[1] is "decimal"
         func = getattr(mapper, f"map_{result[1]}")
 
         # call generate function

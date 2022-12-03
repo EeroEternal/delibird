@@ -6,21 +6,21 @@ requires = ["setuptools >= 65", "wheel"]
 
 [project]
 authors = [
-  {name = "lipi", email = "lipicoder@qq.com"},
-  {name = "zhujw", email = "kratoswittgenstein@gmail.com"},
+    { name = "lipi", email = "lipicoder@qq.com" },
+    { name = "zhujw", email = "kratoswittgenstein@gmail.com" },
 ]
 classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
 ]
 dependencies = [
-  "pyarrow == 9.0.0",
-  "click==8.1.3",
-  "psycopg == 3.1.4",
-  "pyarrow==9.0.0",
-  "PyYAML==6.0",
-  "pytz==2022.2.1",
+    "pyarrow == 9.0.0",
+    "click==8.1.3",
+    "psycopg == 3.1.4",
+    "pyarrow==9.0.0",
+    "PyYAML==6.0",
+    "pytz>=2022.2.6",
 ]
 description = 'exchange data between database or parquet files'
 name = 'delibird'

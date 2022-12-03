@@ -1,6 +1,5 @@
 """test from yaml workflow"""
 
-
 import pytest
 
 from delibird.cli.workflow import workflow
@@ -8,7 +7,7 @@ from delibird.cli.workflow import workflow
 
 @pytest.mark.parametrize(
     "yaml_file",
-    [("./tests/yamls/workflow.yaml")],
+    [("./tests/yaml/workflow.yaml")],
 )
 def test_yaml(yaml_file):
     """test from_parquet function

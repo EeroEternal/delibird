@@ -12,9 +12,9 @@ from delibird.util import show
 
 @pytest.mark.parametrize(
     "mock_file",
-    [("./tests/yamls/mock_file.yaml")],
+    ["./tests/yaml/mock_file.yaml"],
 )
-#pylint: disable=too-many-branches
+# pylint: disable=too-many-branches
 def test_mock_file(mock_file):
     """Test generate mock data from mock file.
 

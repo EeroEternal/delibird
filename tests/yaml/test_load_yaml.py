@@ -10,7 +10,7 @@ from delibird.util.show import show
 
 @pytest.mark.parametrize(
     "yaml_file ",
-    ["tests/yamls/filemock.yaml"],
+    ["tests/yaml/filemock.yaml"],
 )
 def test_load_yaml(yaml_file):
     """test yaml file load

@@ -3,84 +3,85 @@
 import pyarrow as pa
 
 from delibird.database import db, table_exist
-from delibird.mock import decimal_parse
+from delibird.mock import parse
 
 schema_dict = {"postgresql": {
-        "int8": "smallint",
-        "int16": "smallint",
-        "int32": "integer",
-        "int64": "bigint",
-        "uint8": "smallint",
-        "uint16": "smallint",
-        "uint32": "integer",
-        "uint64": "bigint",
-        "float": "double precision",
-        "float32": "real",
-        "float64": "double precision",
-        "double": "double precision",
-        "bool": "boolean",
-        "string": "varchar(255)",
-        "large_string": "text",
-        "binary": "bytea",
-        "large_binary": "bytea",
-        "time32": "time",
-        "time64": "time",
-        "list": "text",
-        "large_list": "text",
-        "struct": "text",
-        "duration": "text",
-        "null": "text",
-    }, "oracle": {
-        "int8": "integer",
-        "int16": "integer",
-        "int32": "integer",
-        "int64": "integer",
-        "uint8": "integer",
-        "uint16": "integer",
-        "uint32": "integer",
-        "uint64": "integer",
-        "float": "number(38,8)",
-        "float32": "number(38,8)",
-        "float64": "number(38,8)",
-        "double": "number(38,8)",
-        "bool": "varchar2(10)",
-        "string": "varchar2(255)",
-        "large_string": "long",
-        "binary": "blob",
-        "large_binary": "blob",
-        "time32": "timestamp",
-        "time64": "timestamp",
-        "list": "varchar2(2000)",
-        "large_list": "varchar2(4000)",
-        "struct": "varchar2(4000)",
-        "duration": "varchar2(4000)",
-        "null": "varchar2(4000)",
-    }, "mysql": {
-        "int8": "tinyint",
-        "int16": "smallint",
-        "int32": "mediumint",
-        "int64": "int",
-        "uint8": "tinyint",
-        "uint16": "smallint",
-        "uint32": "mediumint",
-        "uint64": "int",
-        "float": "float",
-        "float32": "float",
-        "float64": "float",
-        "double": "decimal(25,8)",
-        "bool": "varchar(10)",
-        "string": "varchar(255)",
-        "large_string": "text",
-        "binary": "blob",
-        "large_binary": "longblob",
-        "time32": "timestamp",
-        "time64": "timestamp",
-        "list": "varchar(2000)",
-        "large_list": "varchar(4000)",
-        "struct": "varchar(4000)",
-        "duration": "varchar(4000)",
-        "null": "varchar(100)",
-    }}
+    "int8": "smallint",
+    "int16": "smallint",
+    "int32": "integer",
+    "int64": "bigint",
+    "uint8": "smallint",
+    "uint16": "smallint",
+    "uint32": "integer",
+    "uint64": "bigint",
+    "float": "double precision",
+    "float32": "real",
+    "float64": "double precision",
+    "double": "double precision",
+    "bool": "boolean",
+    "string": "varchar(255)",
+    "large_string": "text",
+    "binary": "bytea",
+    "large_binary": "bytea",
+    "time32": "time",
+    "time64": "time",
+    "list": "text",
+    "large_list": "text",
+    "struct": "text",
+    "duration": "text",
+    "null": "text",
+}, "oracle": {
+    "int8": "integer",
+    "int16": "integer",
+    "int32": "integer",
+    "int64": "integer",
+    "uint8": "integer",
+    "uint16": "integer",
+    "uint32": "integer",
+    "uint64": "integer",
+    "float": "number(38,8)",
+    "float32": "number(38,8)",
+    "float64": "number(38,8)",
+    "double": "number(38,8)",
+    "bool": "varchar2(10)",
+    "string": "varchar2(255)",
+    "large_string": "long",
+    "binary": "blob",
+    "large_binary": "blob",
+    "time32": "timestamp",
+    "time64": "timestamp",
+    "list": "varchar2(2000)",
+    "large_list": "varchar2(4000)",
+    "struct": "varchar2(4000)",
+    "duration": "varchar2(4000)",
+    "null": "varchar2(4000)",
+}, "mysql": {
+    "int8": "tinyint",
+    "int16": "smallint",
+    "int32": "mediumint",
+    "int64": "int",
+    "uint8": "tinyint",
+    "uint16": "smallint",
+    "uint32": "mediumint",
+    "uint64": "int",
+    "float": "float",
+    "float32": "float",
+    "float64": "float",
+    "double": "decimal(25,8)",
+    "bool": "varchar(10)",
+    "string": "varchar(255)",
+    "large_string": "text",
+    "binary": "blob",
+    "large_binary": "longblob",
+    "time32": "timestamp",
+    "time64": "timestamp",
+    "list": "varchar(2000)",
+    "large_list": "varchar(4000)",
+    "struct": "varchar(4000)",
+    "duration": "varchar(4000)",
+    "null": "varchar(100)",
+}}
+
 
 def create_arrow_schema(engine, dsn, table_name):
     """Create arrow schema based on table.
@@ -272,7 +273,7 @@ def table_by_arrow(conn, table_name, arrow_schema):
     # create cursor
     cursor = conn.cursor(dict_row_flag=True)
 
-    #engine
+    # engine
     engine = conn.engine
 
     # change to sql schema
@@ -373,7 +374,7 @@ def sql_type_map(engine, type_name):
 
     if type_name.startswith("decimal"):
         # decimal(10,2)
-        precision, scale = decimal_parse(type_name)
+        precision, scale = parse(type_name)
         return f"decimal({precision},{scale})"
 
     return types_[type_name]

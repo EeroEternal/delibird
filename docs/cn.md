@@ -13,7 +13,7 @@ delibird 是一个 python 工具库，帮助在数据库表和 parquet 之间做
 
 ## 限制：
 
-- 目前仅支持 postgres  , oracle 数据库
+- 目前仅支持 postgres , oracle 数据库
 
 ## 安装
 
@@ -127,7 +127,7 @@ mocks:
 执行这个 mock workflow:
 
 ```sh
-(.env) % delibird mock tests/yamls/mock_file.yaml
+(.env) % delibird mock tests/yaml/mock_file.yaml
 write directory finished
 write parquet finished
 ```
@@ -154,6 +154,7 @@ Commands:
 #### **read 操作**
 
 读取文件，写入数据库表
+
 ```sh
 (.env) % delibird parquet read -h
 Usage: delibird parquet read [OPTIONS] PATH ENGINE DSN TABLE_NAME
@@ -264,8 +265,6 @@ workflows:
     dsn : "postgresql://test:test123@localhost:5432/delibird"
     filepath: "./datasets/mock_data/mock_stocks_rewrite.parquet"
 ```
-
-
 
 ## 还需要完成的事
 

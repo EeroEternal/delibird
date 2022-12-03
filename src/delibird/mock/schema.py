@@ -2,7 +2,21 @@
 
 import pyarrow as pa
 
-from .parser import parse
+from .parser import parse, meta_types
+
+from magicbag import prefix_check
+
+# database type map to arrow type
+maps = {
+    "code": pa.string(),
+    "str": pa.string(),
+    "int": pa.int64(),
+    "float": pa.float64(),
+    "boolean": pa.bool_(),
+    "date": pa.date32(),
+    "time": pa.time32("s"),
+    "string": pa.string(),
+}
 
 
 def schema_from_dict(schema_dict):
@@ -17,35 +31,36 @@ def schema_from_dict(schema_dict):
     # get column name and type ,append to type list
     # 0:name, 1:type_code, OID
     for col in schema_dict.keys():
-        type_list.append(pa.field(col, type_map(schema_dict[col])))
+        arrow_type = type_map(schema_dict[col])
+        if arrow_type:
+            type_list.append(pa.field(col, arrow_type))
 
     # create schema
     return pa.schema(type_list)
 
 
-def type_map(type_str):
+def type_map(type_name):
     """Type map from python to pyarrow type."""
-    # database type map to arrow type
-    # code is special string for security code
-    maps = {
-        "code": pa.string(),
-        "str": pa.string(),
-        "int": pa.int64(),
-        "float": pa.float64(),
-        "boolean": pa.bool_(),
-        "date": pa.date32(),
-        "time": pa.time32("s"),
-        "string": pa.string(),
-    }
+    # get type name by prefix
+    result = prefix_check(type_name, meta_types)
 
-    # decimal like : decimal(10,5)
-    if type_str.startswith("decimal"):
-        precision, scale = parse(type_str)
-        return pa.decimal128(precision, scale)
+    # result[0] is True or False, result[1] is type name
+    if result[0] and result[1]:
+        if result[1] == "decimal":
+            # get precision and scale
+            precision, scale = parse(type_name)
 
-    # timestamp like: timestamp(unit='s',tz='Asia/Shanghai')
-    if type_str.startswith("timestamp"):
-        unit, timezone = parse(type_str)
-        return pa.timestamp(unit, tz=timezone)
+            # return decimal type
+            return pa.decimal128(precision, scale)
 
-    return maps[type_str]
+        if result[1] == "timestamp":
+            # get precision
+            unit, timezone = parse(type_name)
+
+            # return timestamp with unit and timezone
+            return pa.timestamp(unit, tz=timezone)
+
+        # other type return from maps
+        return maps[result[1]]
+
+    return None

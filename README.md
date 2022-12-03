@@ -2,14 +2,17 @@
 
 ## Introduction:
 
-delibird is a python tool library based on Python pyarrow which supports multithread and asynchronous calls. It can help users transform data between database and Parquet files.
+delibird is a python tool library based on Python pyarrow which supports multithread and asynchronous calls. It can help
+users transform data between database and Parquet files.
 
 ## Features:
 
 - Multithread: support batch reading/writeing and multithread functions an database table and Parquet files.
-- Read directory: reading all Parquet files in the giving directory and transform into database. One directory maps to one database table.
+- Read directory: reading all Parquet files in the giving directory and transform into database. One directory maps to
+  one database table.
 - Mock data: create Parquet files or database tables in a customized schema.
-- Workflow: giving a yaml file including your customized configurations, delibird can create a workflow to execute multiple jobs.
+- Workflow: giving a yaml file including your customized configurations, delibird can create a workflow to execute
+  multiple jobs.
 
 ## Limits:
 
@@ -70,38 +73,38 @@ mocks:
     direction: "directory" # directory ,file or  table
     directory: "./datasets/mock_data/mock_stocks"
     columns: {
-                # stock code as a type
-                "sec_code": "code",  # "600001"
-                "date": "date",  # 2022-08-24
-                "close": "float",  # 16.87
-                "open": "float",  # 16.65
-                "high": "float",  # 16.95
-                "low": "float",  # 16.55
-                "hold": "decimal(10,5)",  # 123.25515
-                "time": "timestample(unit=s,tz=Asia/Shanghai)",
-                "volume": "int",  # 1530231
-                "amount": "int",  # 2571196416
-                "memo":"string", # hello
-            }
+      # stock code as a type
+      "sec_code": "code",  # "600001"
+      "date": "date",  # 2022-08-24
+      "close": "float",  # 16.87
+      "open": "float",  # 16.65
+      "high": "float",  # 16.95
+      "low": "float",  # 16.55
+      "hold": "decimal(10,5)",  # 123.25515
+      "time": "timestample(unit=s,tz=Asia/Shanghai)",
+      "volume": "int",  # 1530231
+      "amount": "int",  # 2571196416
+      "memo": "string", # hello
+    }
 
   - name: "mock-to-file"
     row-number: 2048
     direction: "file" # directory, file or table
     filepath: "./datasets/mock_data/mock_stocks.parquet"
     columns: {
-                # stock code as a type
-                "sec_code": "code",  # "600001"
-                "date": "date",  # 2022-08-24
-                "close": "float",  # 16.87
-                "open": "float",  # 16.65
-                "high": "float",  # 16.95
-                "low": "float",  # 16.55
-                "hold": "decimal(10,5)",  # 123.25515
-                "time": "timestample(unit=s,tz=Asia/Shanghai)",
-                "volume": "int",  # 1530231
-                "amount": "int",  # 2571196416
-                "memo":"string", # hello
-            }
+      # stock code as a type
+      "sec_code": "code",  # "600001"
+      "date": "date",  # 2022-08-24
+      "close": "float",  # 16.87
+      "open": "float",  # 16.65
+      "high": "float",  # 16.95
+      "low": "float",  # 16.55
+      "hold": "decimal(10,5)",  # 123.25515
+      "time": "timestample(unit=s,tz=Asia/Shanghai)",
+      "volume": "int",  # 1530231
+      "amount": "int",  # 2571196416
+      "memo": "string", # hello
+    }
 
   - name: "mock-to-table"
     row-number: 204800
@@ -110,37 +113,41 @@ mocks:
     dsn: "postgresql://test:test123@localhost:5432/delibird"
     table-name: "mock_stocks"
     columns: {
-                # stock code as a type
-                "sec_code": "code",  # "600001"
-                "date": "date",  # 2022-08-24
-                "close": "float",  # 16.87
-                "open": "float",  # 16.65
-                "high": "float",  # 16.95
-                "low": "float",  # 16.55
-                "hold": "decimal(10,5)",  # 123.25515
-                # datetime.datetime(2022,10,25).timestamp()
-                "time": "timestample(unit=s,tz=Asia/Shanghai)",
-                "volume": "int",  # 1530231
-                "amount": "int",  # 2571196416
-            }
+      # stock code as a type
+      "sec_code": "code",  # "600001"
+      "date": "date",  # 2022-08-24
+      "close": "float",  # 16.87
+      "open": "float",  # 16.65
+      "high": "float",  # 16.95
+      "low": "float",  # 16.55
+      "hold": "decimal(10,5)",  # 123.25515
+      # datetime.datetime(2022,10,25).timestamp()
+      "time": "timestample(unit=s,tz=Asia/Shanghai)",
+      "volume": "int",  # 1530231
+      "amount": "int",  # 2571196416
+    }
 
 ```
 
-```direction```  transform to which format. 'directory': a directory path. 'file': a file path. 'table': a database table name.
+```direction```  transform to which format. 'directory': a directory path. 'file': a file path. 'table': a database
+table name.
 
-```columns``` defination of the database table. Support standard data types of Postgresql or Oracle db, based on which database you choose. delibird will auto map the database data type to pyarrow row data type. 'code' means stock code, which would be removed later.
+```columns``` defination of the database table. Support standard data types of Postgresql or Oracle db, based on which
+database you choose. delibird will auto map the database data type to pyarrow row data type. 'code' means stock code,
+which would be removed later.
 
 execute mock workflow:
 
 ```sh
-(.env) % delibird mock tests/yamls/mock_file.yaml
+(.env) % delibird mock tests/yaml/mock_file.yaml
 write directory finished
 write parquet finished
 ```
 
 ### parquet
 
-Read data in database table and write data into a Parquet file or Parquet files in a directory. Or read data in a Parquet file or Parquet files in a directory and write data into a database table.
+Read data in database table and write data into a Parquet file or Parquet files in a directory. Or read data in a
+Parquet file or Parquet files in a directory and write data into a database table.
 
 ```sh
 (.env) % delibird parquet
@@ -229,7 +236,8 @@ ea6c445914824cae8ef171bbafd3a58f.parquet
 delibird parquet write -e postgresql datasets/mock_data/mock_stocks_tmp.parquet postgresql://test:test123@localhost:5432/delibird mock_stocks;
 ```
 
-Consider of reducing the memory usage and speed up the writing efficiency. write file can also support configuration of batch size.
+Consider of reducing the memory usage and speed up the writing efficiency. write file can also support configuration of
+batch size.
 
 ### workflow
 
@@ -253,7 +261,7 @@ workflows:
     direction: "table" # table or file or directory
     table-name: "mock_stocks" # table name
     engine: "postgresql"
-    dsn : "postgresql://test:test123@localhost:5432/delibird"
+    dsn: "postgresql://test:test123@localhost:5432/delibird"
     read-type: "file" # file or directory
     filepath: "./datasets/mock_data/mock_stocks.parquet" # filepath
 
@@ -261,7 +269,7 @@ workflows:
     direction: "directory"
     table-name: "mock_stocks" # table name
     engine: "postgresql"
-    dsn : "postgresql://test:test123@localhost:5432/delibird"
+    dsn: "postgresql://test:test123@localhost:5432/delibird"
     directory: "./datasets/mock_data/mock_stocks" # directory path
     batch-size: 1024 # batch size
 
@@ -269,11 +277,9 @@ workflows:
     direction: "file"
     table-name: "mock_stocks" # table name
     engine: "postgresql"
-    dsn : "postgresql://test:test123@localhost:5432/delibird"
+    dsn: "postgresql://test:test123@localhost:5432/delibird"
     filepath: "./datasets/mock_data/mock_stocks_rewrite.parquet"
 ```
-
-
 
 ## TODO
 

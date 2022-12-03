@@ -8,7 +8,7 @@ from delibird.cli import cli
 
 @pytest.mark.parametrize(
     "mock_file",
-    [("./tests/yamls/mock_table.yaml")],
+    [("./tests/yaml/mock_table.yaml")],
 )
 def test_mock(mock_file):
     """Test generate mock data from mock file.

@@ -1,6 +1,5 @@
 """Test mock table."""
 
-
 import pytest
 import yaml
 
@@ -10,7 +9,7 @@ from delibird.database import db, table_exist
 
 @pytest.mark.parametrize(
     "mock_file",
-    [("./tests/yamls/mock_table.yaml")],
+    [("./tests/yaml/mock_table.yaml")],
 )
 def test_mock_table(mock_file):
     """Test generate mock data and write to table.
@@ -43,7 +42,7 @@ def test_mock_table(mock_file):
                 print("mock file no dsn")
                 assert False
 
-            #check row number
+            # check row number
             if "row-number" not in mock:
                 print("mock file no row-number")
                 assert False
@@ -55,7 +54,7 @@ def test_mock_table(mock_file):
 
     # truncate mock table
     for table in tables:
-        table_name , dsn, _ = table
+        table_name, dsn, _ = table
         conn = db.connect(dsn)
         if not conn:
             print("connect database failed")
@@ -91,7 +90,7 @@ def test_mock_table(mock_file):
             print("connect database failed")
             assert False
 
-        if not table_exist(conn,table_name):
+        if not table_exist(conn, table_name):
             print("table not exist")
             assert False
 

@@ -3,7 +3,7 @@
 # workflow lists
 mocks:
   - name: "mock-to-directory"
-    row-number: 20000000
+    row-number: 200000
     direction: "directory" # directory ,file or  table
     directory: "./datasets/funds/price"
     columns: {
@@ -13,12 +13,12 @@ mocks:
       "update_time": "datetime(tz=Asia/Shanghai)",
       "data_source": "string",
       "origin_db": "string(10)", # origin database.max length is 10
-      "sec_code": "code", # inner code
+      "sec_code": "int(6)", # inner code
       "publish_data": "date",  # 2022-08-24
       "source": "string", # info source. default max langth is 255
       "end_date": "date",  # end date
       "net_value": "decimal(18,4)", # NetValue
-      "unit_value": "decimal(20.8)",  # UnitNV
+      "unit_value": "decimal(20,8)",  # UnitNV
       "profit": "decimal(20,8)",  # Daily Profit Rate
       "week_yield": "decimal(18,8)",  # Weekly Yield
       "rate_factor": "decimal(19,12)",  # Growth rate factor
@@ -29,3 +29,4 @@ mocks:
       "day_grow": "decimal(18,10)",  # Daily growth rate
       "discount": "decimal(18,10)",  # Discount rate
     }
+    

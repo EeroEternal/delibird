@@ -8,7 +8,7 @@ from delibird.cli import cli
 
 @pytest.mark.parametrize(
     "yaml_file",
-    [("./tests/yamls/workflow.yaml")],
+    ["./tests/yaml/mock_dir.yaml"],
 )
 def test_yaml(yaml_file):
     """Test read parquet by yaml file.

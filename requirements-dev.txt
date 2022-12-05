@@ -3,7 +3,7 @@ psycopg==3.1.4
 pyarrow==9.0.0
 PyYAML==6.0
 pytest==7.2.0
-pytz==2022.6
+pytz>=2022.6
 black==22.10.0
 pylint==2.15.7
 pydocstyle==6.1.1
@@ -13,3 +13,5 @@ PyMySQL==1.0.2
 setuptools==65.6.3
 magicbag==0.0.19
 psutil>=5.8.0
+delibird~=0.0.6
+types-contextvars==2.4.7

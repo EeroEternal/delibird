@@ -4,13 +4,28 @@ from .context import Context
 
 
 # pylint: disable=too-few-public-methods
-class Registry:
+class Registry(Context):
     """Global registry for context objects."""
 
     def __init__(self):
         """Initialize the registry."""
         self._registry = {}
 
-    def register(self, context: Context):
-        """Register a context."""
+    def add(self):
+        """Add a context."""
         self._registry[context.name] = context
+
+
+# global registry instance
+GLOBAL_REGISTRY = Registry()
+
+
+def init_registry():
+    """Initialize the global registry."""
+    global GLOBAL_REGISTRY
+
+    # if existed, just return
+    if GLOBAL_REGISTRY:
+        return
+
+    GLOBAL_REGISTRY = Registry()

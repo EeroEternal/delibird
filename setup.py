@@ -1,3 +1,4 @@
+"""Setup configuration for the package."""
 # -*- coding: utf-8 -*-
 try:
     from setuptools import find_packages, setup
@@ -7,11 +8,11 @@ except ImportError:
     distribute_setup.use_setuptools()
     from setuptools import setup, find_packages
 
-import os
-import sys
-from distutils import log
-
-long_desc = """delibird is a python tool library based on Python pyarrow which supports multithread and asynchronous calls. It can help users transform data between database and Parquet files."""
+# pylint: disable=invalid-name
+long_desc = """delibird is a python tool library based on Python pyarrow \
+which supports multithread and asynchronous calls. \
+It can help users transform data 
+between database and Parquet files."""
 
 requires = ["pyarrow", "psycopy", "click"]
 

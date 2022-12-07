@@ -1,6 +1,8 @@
 """Job base class."""
 import warnings
 from ..context import Registry
+from ..util import get_parameters
+from ..execute import Worker
 
 
 # pylint: disable=too-few-public-methods
@@ -20,6 +22,7 @@ class Job:
         """
         self.name = name
         self.func = func
+        self.worker = None
 
         # Get registry from current context
         registry = Registry.get()
@@ -34,10 +37,17 @@ class Job:
                ):
             warnings.warn(f"Job with name {self.name} already exists")
 
+    def set_worker(self, worker: Worker):
+        """Set worker for job."""
+        self.worker = worker
 
     def __call__(self, *args, **kwargs):
         """Call workflow."""
-        # todo: add different runner
+        # if worker is set, send job to worker
+        if self.worker:
+            parameters = get_parameters(self.func)
+
+        # if worker is not set, run in current process
         return self.func(*args, **kwargs)
 
 

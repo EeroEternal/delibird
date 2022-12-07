@@ -1,6 +1,6 @@
 """Job tests."""
 
-from delibird.job import job
+from delibird.workflow import job
 
 
 # pylint: disable=invalid-name
@@ -11,5 +11,5 @@ def func(a, b):
 
 
 def test_job():
-    """Test job."""
+    """Test workflow."""
     assert func(1, 2) == 3

@@ -7,13 +7,32 @@ from .context import Context
 class Registry(Context):
     """Global registry for context objects."""
 
+    # As class attribution, used as global variable?
+    # _instance is a dict. key is type name ,value is a list
+    # with all instances of this type.
+    # like {type[T], [T, T, T]}, T is some type
+    _instances: {}
+
     def __init__(self):
         """Initialize the registry."""
         self._registry = {}
 
-    def add(self, context, name="default"):
-        """Add a context."""
-        self._registry[name] = context
+    def add(self, context):
+        """Add a context to the registry."""
+        self._instances[type(context)].append(context)
+
+    def get_instances(self, object_type):
+        """Get all instances with the given type.
+
+        Args:
+            object_type: type of the object
+        """
+        # get all type and instance from _instances
+        # Check type if subclass of given type
+        # return all instances with given type
+        return \
+            [instance for type_, instance in self._instances.items()
+             if issubclass(type_, object_type)]
 
     @classmethod
     def register(cls, class_):
@@ -38,18 +57,3 @@ class Registry(Context):
         # add new init to wrapper class
         class_.__init__ = __wrap_init__
         return class_
-
-
-# global registry instance
-GLOBAL_REGISTRY = Registry()
-
-
-def init_registry():
-    """Initialize the global registry."""
-    global GLOBAL_REGISTRY
-
-    # if existed, just return
-    if GLOBAL_REGISTRY:
-        return
-
-    GLOBAL_REGISTRY = Registry()

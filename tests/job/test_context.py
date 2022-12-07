@@ -84,6 +84,6 @@ def test_context():
     context.test_context()
 
 
-# for print decorator. use python tests/job/test_context.py
+# for print decorator. use python tests/workflow/test_context.py
 if __name__ == '__main__':
     test_context()

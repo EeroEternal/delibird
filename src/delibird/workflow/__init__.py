@@ -1,5 +1,5 @@
 """Init."""
 
-from .base import Job, job
+from .job import Job, job
 
 __all__ = ["Job", "job"]

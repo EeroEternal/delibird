@@ -1,12 +1,12 @@
-"""Test context management."""
+"""Test env management."""
 
 from contextvars import ContextVar, Token
 
 
 class Context:
-    """Context class to manage the context of the application.
+    """Context class to manage the env of the application.
 
-    forbid mutation while providing a context manager with contextvar
+    forbid mutation while providing a env manager with contextvar
     """
 
     # static element belongs to class
@@ -14,51 +14,51 @@ class Context:
     _token: Token
 
     def __int__(self):
-        """Get the context instance."""
-        print('context init')
+        """Get the env instance."""
+        print('env init')
 
     def __enter__(self):
-        """Enter the context."""
+        """Enter the env."""
         if self._token:
             raise RuntimeError(
-                "Asymmetric use of context. Context enter called without an exit."
+                "Asymmetric use of env. Context enter called without an exit."
             )
 
-        print('enter context')
-        # context enter will return context instance with a token
+        print('enter env')
+        # env enter will return env instance with a token
         self._token = self.__var__.set(self)
         return self
 
     def __exit__(self, *_):
-        """Exit the context."""
+        """Exit the env."""
         if not self._token:
             raise RuntimeError(
-                "Asymmetric use of context. Context exit called without an enter."
+                "Asymmetric use of env. Context exit called without an enter."
             )
-        # Reset the context variable to the value it had before the
+        # Reset the env variable to the value it had before the
         # ContextVar.set() that created the token was used.
         self.__var__.reset(self._token)
 
         # reset token
         self._token = Token()
 
-        print('exit context')
+        print('exit env')
 
     @classmethod
     def get(cls):
-        """Get the context instance."""
-        print("get context")
+        """Get the env instance."""
+        print("get env")
         return cls.__var__.get()
 
     @classmethod
     def register(cls, class_):
-        """Register the context."""
+        """Register the env."""
         class_init = class_.__init__
         print('register decorator')
 
         def __wrap_init__(self, *args, **kwargs):
-            """Initialize the context."""
-            print("init test context")
+            """Initialize the env."""
+            print("init test env")
             class_init(self, *args, **kwargs)
             self.wrap_name = "register"
 
@@ -69,16 +69,16 @@ class Context:
 @Context.register
 # pylint: disable=too-few-public-methods
 class TestContext:
-    """Test context management."""
+    """Test env management."""
     __test__ = False
 
     def test_context(self):
-        """Test context."""
-        print('test context method')
+        """Test env."""
+        print('test env method')
 
 
 def test_context():
-    """Test context."""
+    """Test env."""
     context = TestContext()
 
     context.test_context()

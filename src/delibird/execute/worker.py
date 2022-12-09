@@ -10,12 +10,12 @@ class Worker(ABC):
         pass
 
     @abstractmethod
-    def run(self, execute_job, parameters):
+    def run(self, execute_job, parameters=None):
         """Run worker.
 
         Args:
             execute_job: job or workflow to be executed
-            parameters: parameters of the job or workflow
+            parameters: parameters of the job or workflow. default is None
         """
         # check if job or workflow
 

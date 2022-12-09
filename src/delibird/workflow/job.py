@@ -1,6 +1,6 @@
 """Job base class."""
 import warnings
-from ..context import Registry
+from ..env import Registry
 from ..util import get_parameters
 from ..execute import Worker
 
@@ -24,11 +24,11 @@ class Job:
         self.func = func
         self.worker = None
 
-        # Get registry from current context
+        # Get registry from current env
         registry = Registry.get()
 
         if not registry:
-            raise RuntimeError("No registry found in context")
+            raise RuntimeError("No registry found in env")
 
         # todo: Check if item has name?
         if any(isinstance(item, Job)
@@ -46,11 +46,12 @@ class Job:
         # if worker is set, send job to worker
         if self.worker:
             parameters = get_parameters(self.func)
+            self.worker.run(self, parameters)
 
         # if worker is not set, run in current process
         return self.func(*args, **kwargs)
 
 
 def job(func=None, name: str = None):
-    """Decorator for workflow."""
+    """Decorator for job."""
     return Job(func, name)

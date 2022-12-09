@@ -8,7 +8,7 @@ from .worker import Worker
 class Single(Worker):
     """Multiprocess worker is a worker that executes jobs in multiprocess"""
 
-    def run(self, execute_job, parameters):
+    def run(self, execute_job, parameters=None):
         """Run multiprocess worker.
 
         Args:

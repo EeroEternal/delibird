@@ -37,7 +37,7 @@ delibird = "delibird.cli:cli"
 where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = [".", "src"]
 
 [tool.isort]
 profile = 'black'

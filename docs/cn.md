@@ -36,7 +36,7 @@ $ python -m build
 输入 delibird 会显示使用方法：
 
 ```sh
-(.env) % delibird
+(.context) % delibird
 Usage: delibird [OPTIONS] COMMAND [ARGS]...
 
   delibird command line interface.
@@ -127,7 +127,7 @@ mocks:
 执行这个 mock workflow:
 
 ```sh
-(.env) % delibird mock tests/yaml/mock_file.yaml
+(.context) % delibird mock tests/yaml/mock_file.yaml
 write directory finished
 write parquet finished
 ```
@@ -138,7 +138,7 @@ write parquet finished
 或者从 parquet 或者目录读取文件内容，写入到数据库表中
 
 ```sh
-(.env) % delibird parquet
+(.context) % delibird parquet
 Usage: delibird parquet [OPTIONS] COMMAND [ARGS]...
 
   Write or read Parquet file or directory.
@@ -156,7 +156,7 @@ Commands:
 读取文件，写入数据库表
 
 ```sh
-(.env) % delibird parquet read -h
+(.context) % delibird parquet read -h
 Usage: delibird parquet read [OPTIONS] PATH ENGINE DSN TABLE_NAME
 
   Read parquet file, write to database.
@@ -180,7 +180,7 @@ delibird parquet read datasets/mock_data/mock_stocks.parquet postgresql postgres
 读取数据库表，生成到**目录**中
 
 ```sh
-(.env) % delibird parquet write -h
+(.context) % delibird parquet write -h
 Usage: delibird parquet write [OPTIONS] PATH ENGINE DSN TABLE_NAME
 
   Read from database and write to parquet file.
@@ -209,7 +209,7 @@ delibird parquet write -s 1024  datasets/mock_data/mock_stocks postgresql postgr
 这样的话，单个文件的最大记录数是1024，在目录下就可以看到有四个文件：
 
 ```sh
-(.env) % ls datasets/mock_data/mock_stocks
+(.context) % ls datasets/mock_data/mock_stocks
 ea6c445914824cae8ef171bbafd3a58f.parquet
 604a63ccf14343c39bcc5bc0d1b3907d.parquet
 9c7150d9821c46c78054d87ae23d900f.parquet
@@ -229,7 +229,7 @@ delibird parquet write datasets/mock_data/mock_stocks_tmp.parquet postgresql pos
 建立一个处理的工作流，以 yaml 文件作为流程记录
 
 ```sh
-(.env) % delibird workflow  -h
+(.context) % delibird workflow  -h
 Usage: delibird workflow [OPTIONS] YAML_FILE
 
   Execute yaml workflow.

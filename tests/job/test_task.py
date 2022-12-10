@@ -1,10 +1,14 @@
 """Job tests."""
 
-from delibird.workflow import job
+from delibird.workflow import task
+from delibird.context import init
+
+# init instance
+init()
 
 
 # pylint: disable=invalid-name
-@job
+@task(name="test")
 def func(a, b):
     """Test function."""
     return a + b
@@ -12,4 +16,6 @@ def func(a, b):
 
 def test_job():
     """Test workflow."""
+
+
     assert func(1, 2) == 3

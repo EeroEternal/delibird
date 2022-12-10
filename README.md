@@ -45,7 +45,7 @@ $ pip install delibird
 Input 'delibird' in command line. The usage lint will be displayed.
 
 ```sh
-(.env) % delibird
+(.context) % delibird
 Usage: delibird [OPTIONS] COMMAND [ARGS]...
 
   delibird command line interface.
@@ -139,7 +139,7 @@ which would be removed later.
 execute mock workflow:
 
 ```sh
-(.env) % delibird mock tests/yaml/mock_file.yaml
+(.context) % delibird mock tests/yaml/mock_file.yaml
 write directory finished
 write parquet finished
 ```
@@ -150,7 +150,7 @@ Read data in database table and write data into a Parquet file or Parquet files 
 Parquet file or Parquet files in a directory and write data into a database table.
 
 ```sh
-(.env) % delibird parquet
+(.context) % delibird parquet
 Usage: delibird parquet [OPTIONS] COMMAND [ARGS]...
 
   Write or read Parquet file or directory.
@@ -168,7 +168,7 @@ Commands:
 Read data in a Parquet file or Parquet files in a directory and write data into a database table.
 
 ```sh
-(.env) % delibird parquet read -h
+(.context) % delibird parquet read -h
 Usage: delibird parquet read [OPTIONS] [-e ENGINE] PATH DSN TABLE_NAME
 
   Read parquet file, write to database.
@@ -194,7 +194,7 @@ Read data in database table and write data into a Parquet file or Parquet files 
 **directory**.
 
 ```sh
-(.env) % delibird parquet write -h
+(.context) % delibird parquet write -h
 Usage: delibird parquet write [OPTIONS]  [-e ENGINE] PATH DSN TABLE_NAME
 
   Read from database and write to parquet file.
@@ -223,7 +223,7 @@ delibird parquet write -s 1024 -e postgresql datasets/mock_data/mock_stocks post
 In this case, the max row number of a single parquet file is 1024, we can see four files in the directory.
 
 ```sh
-(.env) % ls datasets/mock_data/mock_stocks
+(.context) % ls datasets/mock_data/mock_stocks
 ea6c445914824cae8ef171bbafd3a58f.parquet
 604a63ccf14343c39bcc5bc0d1b3907d.parquet
 9c7150d9821c46c78054d87ae23d900f.parquet
@@ -244,7 +244,7 @@ batch size.
 create and exectue a workflow using a yaml configuration file.
 
 ```sh
-(.env) % delibird workflow  -h
+(.context) % delibird workflow  -h
 Usage: delibird workflow [OPTIONS] YAML_FILE
 
   Execute yaml workflow.

@@ -3,8 +3,8 @@
 ```
 
 ```bash
-    python -m venv .env
-    source .env/bin/activate
+    python -m venv .context
+    source .context/bin/activate
     pip install -r requirements-dev.txt
 
     export PYTHONPATH=$PWD/src:$PYTHONPATH

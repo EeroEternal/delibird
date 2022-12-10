@@ -1,5 +1,4 @@
-"""Single execution mode."""
-from ..workflow import Plan, Task
+"""Single process execution mode."""
 from .worker import Worker
 
 
@@ -7,20 +6,15 @@ from .worker import Worker
 class Single(Worker):
     """Multiprocess worker is a worker that executes jobs in multiprocess"""
 
-    def run(self, executor, *args, **kwargs):
-        """Run multiprocess worker.
-
-        Args:
-            executor: job or workflow to be executed
-            args: args of the job or workflow
-            kwargs: kwargs of the job or workflow
-        """
-        # if instance is 'job' type, run this job
-        if isinstance(executor, Task):
-            executor(args, kwargs)
-
-        # if workflow, run workflow
-        if isinstance(executor, Plan):
-            # execute plan
-            for job in executor.jobs:
-                job(args, kwargs)
+    def run(self):
+        """Run multiprocess worker."""
+        # execute plan
+        result = []
+        for plan in self._plans:
+            for task in plan.tasks:
+                # execute task
+                func = task[0]
+                args = task[1]
+                kwargs = task[2]
+                result.append(func(*args, **kwargs))
+        return result

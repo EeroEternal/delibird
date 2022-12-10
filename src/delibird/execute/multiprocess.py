@@ -1,26 +1,31 @@
 """Multiprocess worker module."""
-from ..workflow import Plan, Task
+from multiprocessing import Pool, cpu_count
+
 from .worker import Worker
 
 
 # pylint: disable=too-few-public-methods
 class Multiprocess(Worker):
-    """Multiprocess worker is a worker that executes jobs in multiprocess"""
+    """Multiprocess worker is a worker that executes tasks in multiprocess"""
 
-    def run(self, executor, parameters=None):
-        """Run multiprocess worker.
+    def __init__(self, processes=None):
+        """Initialize multiprocess worker.
 
         Args:
-            executor: job or workflow to be executed
-            parameters: parameters of the job or workflow
+            processes: number of processes to be used
         """
-        # check if job or workflow
+        super().__init__()
 
-        # if instance is 'job' type, run this job
-        if isinstance(executor, Task):
-            executor()
+        if processes is None:
+            self.processes = cpu_count() - 1
 
+    def run(self):
+        """Run multiprocess worker."""
+        # check if workflow or workflow
+
+        # todo: add multiprocess pool
         # if workflow, run workflow
-        if isinstance(executor, Plan):
-            for job in executor.jobs:
-                job(parameters)
+        # with Pool(self.processes) as pool:
+        #     pool.starmap(executor, parameters)
+        #     for job in executor.tasks:
+        #             job(parameters)

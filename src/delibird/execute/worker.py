@@ -7,16 +7,17 @@ class Worker(ABC):
     """Worker is an execute unit that executes jobs"""
 
     def __init__(self):
-        pass
+        # plan list
+        self._plans = []
 
-    @abstractmethod
-    def run(self, executor, parameters=None):
-        """Run worker.
+    def add(self, plan):
+        """Add task or plan to worker.
 
         Args:
-            executor: job or workflow to be executed
-            parameters: parameters of the job or workflow. default is None
+            plan: task or plan. task also a plan
         """
-        # check if job or workflow
+        self._plans.append(plan)
 
-        # if instance is 'job' type, run this job
+    @abstractmethod
+    def run(self):
+        """Run plan list in the worker."""

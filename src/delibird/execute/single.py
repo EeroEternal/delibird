@@ -7,21 +7,20 @@ from .worker import Worker
 class Single(Worker):
     """Multiprocess worker is a worker that executes jobs in multiprocess"""
 
-    def run(self, executor, parameters=None):
+    def run(self, executor, *args, **kwargs):
         """Run multiprocess worker.
 
         Args:
             executor: job or workflow to be executed
-            parameters: parameters of the job or workflow
+            args: args of the job or workflow
+            kwargs: kwargs of the job or workflow
         """
         # if instance is 'job' type, run this job
         if isinstance(executor, Task):
-            executor()
+            executor(args, kwargs)
 
         # if workflow, run workflow
-        # todo: parameters need to change to args and kwargs?
-
         if isinstance(executor, Plan):
             # execute plan
             for job in executor.jobs:
-                job(parameters)
+                job(args, kwargs)

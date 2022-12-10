@@ -8,4 +8,4 @@ def init():
     Instance()
 
 
-__all__ = ["init"]
+__all__ = ["init", "Instance"]

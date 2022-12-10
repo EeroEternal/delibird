@@ -5,7 +5,6 @@ from contextvars import copy_context
 from uuid import uuid4
 
 from ..context import Instance
-from ..util import get_parameters
 
 
 # pylint: disable=too-few-public-methods
@@ -16,14 +15,14 @@ class Task:
     To preserve the input and output types,
     """
 
-    def __init__(self, func, name: str = None, context=None, worker=None):
+    def __init__(self, func, name=None, worker=None, context=None):
         """Initialize Job.
 
         Args:
             func: function to be run
             name: name of the workflow. default is None
-            context: context of the Job. default is None
             worker: worker to run the job. default is None
+            context: context of the Job. default is None
         """
         # job name must be unique
         if not name:
@@ -70,8 +69,7 @@ class Task:
         """Call workflow."""
         # if worker is set, send job to worker
         if self.worker:
-            parameters = get_parameters(self.func)
-            self.worker.run(self, parameters)
+            self.worker.run(self.func, *args, **kwargs)
 
         # if worker is not set, run in current process
         if self.func:
@@ -81,9 +79,15 @@ class Task:
         raise RuntimeError("No function to run")
 
 
-def task(func=None, name=None):
-    """Decorator for job."""
-    if func:
-        return Task(func, name)
+def task(func=None, name=None, worker=None):
+    """Decorator for job.
 
-    return lambda function: Task(function, name)
+    Args:
+        func: function to be run
+        name: name of the workflow. default is None
+        worker: worker to run the job. default is None
+    """
+    if func:
+        return Task(func, name, worker=worker)
+
+    return lambda function: Task(function, name, worker)

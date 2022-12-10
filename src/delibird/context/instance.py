@@ -27,6 +27,10 @@ class Instance:
 
     def add(self, instance_):
         """Add an instance object to the  Instance."""
+        # init _instances
+        if type(instance_) not in self.__instances__:
+            self.__instances__[type(instance_)] = []
+
         self.__instances__[type(instance_)].append(instance_)
 
     @classmethod
@@ -49,27 +53,3 @@ class Instance:
     def get(cls):
         """Get the context instance."""
         return cls.__var__.get()
-
-    @classmethod
-    def register(cls, class_):
-        """Decorator for a class.
-
-        Add registration to the registry object on init instance
-        """
-        class_init = class_.__init__
-
-        def __wrap_init__(wrap_self, *args, **kwargs):
-            """Initialize the context."""
-
-            # get the context instance
-            registry = cls.get()
-
-            # invoke wrapped class init
-            class_init(wrap_self, *args, **kwargs)
-
-            # add wrapped class instance to registry
-            registry.add(wrap_self)
-
-        # add new init to wrapper class
-        class_.__init__ = __wrap_init__
-        return class_

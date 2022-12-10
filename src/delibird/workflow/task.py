@@ -16,13 +16,14 @@ class Task:
     To preserve the input and output types,
     """
 
-    def __init__(self, func, name: str = None, context=None):
+    def __init__(self, func, name: str = None, context=None, worker=None):
         """Initialize Job.
 
         Args:
             func: function to be run
             name: name of the workflow. default is None
             context: context of the Job. default is None
+            worker: worker to run the job. default is None
         """
         # job name must be unique
         if not name:
@@ -35,7 +36,7 @@ class Task:
         self.func = func
 
         # job worker to run func
-        self.worker = None
+        self.worker = worker
 
         # set job context
         if context is None:
@@ -52,14 +53,14 @@ class Task:
             raise RuntimeError("No global instance manager found in context")
 
         # check if it has same name job in instance manager
-        if any(isinstance(item, Task)
-               for item in instance.get_instances(task)
-               if item.name == self.name
-               ):
-            warnings.warn(f"Job with name {self.name} already exists")
+        # get items with Task type
+        for item_list in instance.get_instances(Task):
+            for item in item_list:
+                if item.name == self.name:
+                    warnings.warn(f"Job with name {self.name} already exists")
 
         # register job instance to instance manager
-        instance.register(self)
+        instance.add(self)
 
     def set_worker(self, worker):
         """Set worker for job."""

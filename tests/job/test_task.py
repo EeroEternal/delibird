@@ -14,8 +14,6 @@ def func(a, b):
     return a + b
 
 
-def test_job():
-    """Test workflow."""
-
-
+def test_task():
+    """Test task."""
     assert func(1, 2) == 3

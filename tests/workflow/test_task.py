@@ -2,7 +2,7 @@
 
 from delibird.workflow import task, Plan
 from delibird.context import init
-from delibird.execute import Single, Multiprocess
+from delibird.execute import Single, Concurrent
 
 # init instance
 init()
@@ -31,10 +31,10 @@ def test_task():
     assert plus_again(2, 3) == 5
 
     # multiprocess worker
-    # multi_worker = Multiprocess(processes=2)
+    multi_worker = Concurrent(processes=2)
 
-    # plan = Plan(worker=worker)
-    # plan.add_task(plus, 1, 2)
-    # plan.add_task(plus, 4, 5)
-    # result = plan()
-    # assert result == [3, 9]
+    plan = Plan(worker=multi_worker)
+    plan.add_task(plus, 1, 2)
+    plan.add_task(plus, 4, 5)
+    result = plan()
+    assert result == [3, 9]

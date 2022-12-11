@@ -35,10 +35,15 @@ class Task(Plan):
             kwargs: kwargs of the task
         """
         # run task
-        self.add_task(self._func, *args, **kwargs)
+        self.add_task(self, *args, **kwargs)
 
         # call super to run task
         return super().__call__()
+
+    @property
+    def func(self):
+        """Get task function."""
+        return self._func
 
 
 def task(func=None, name=None, worker=None):

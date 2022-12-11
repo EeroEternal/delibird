@@ -21,3 +21,7 @@ class Worker(ABC):
     @abstractmethod
     def run(self):
         """Run plan list in the worker."""
+
+    def clean(self):
+        """Clean worker."""
+        self._plans = []

@@ -2,6 +2,6 @@
 
 from .worker import Worker
 from .single import Single
-from .multiprocess import Multiprocess
+from .concurrent import Concurrent
 
-__all__ = ['Single', 'Multiprocess', 'Worker']
+__all__ = ['Single', 'Concurrent', 'Worker']

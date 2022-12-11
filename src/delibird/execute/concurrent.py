@@ -5,7 +5,7 @@ from .worker import Worker
 
 
 # pylint: disable=too-few-public-methods
-class Multiprocess(Worker):
+class Concurrent(Worker):
     """Multiprocess worker is a worker that executes tasks in multiprocess"""
 
     def __init__(self, processes=None):
@@ -16,16 +16,25 @@ class Multiprocess(Worker):
         """
         super().__init__()
 
+        self.processes = processes
         if processes is None:
             self.processes = cpu_count() - 1
 
+        # pylint: disable=consider-using-with
+        self._pool = Pool(processes=self.processes)
+
     def run(self):
         """Run multiprocess worker."""
-        # check if workflow or workflow
 
-        # todo: add multiprocess pool
-        # if workflow, run workflow
-        # with Pool(self.processes) as pool:
-        #     pool.starmap(executor, parameters)
-        #     for job in executor.tasks:
-        #             job(parameters)
+        # map run plan
+        result = []
+        for plan in self._plans:
+            result.append(self._pool.starmap(run_func, plan.tasks))
+
+        # terminal pool
+        self._pool.close()
+
+
+def run_func(func, args, kwargs):
+    """Run func with args and kwargs."""
+    return func(*args, **kwargs)

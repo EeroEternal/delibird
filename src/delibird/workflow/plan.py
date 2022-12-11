@@ -64,15 +64,15 @@ class Plan:
         """Get plan name."""
         return self._name
 
-    def add_task(self, func, *args, **kwargs):
+    def add_task(self, task, *args, **kwargs):
         """Add task to plan.
 
         Args:
-            func: task to be added
+            task: task to be added
             args: args of task
             kwargs: kwargs of task
         """
-        self._tasks.append((func, args, kwargs))
+        self._tasks.append((task.func, args, kwargs))
 
     @property
     def tasks(self):
@@ -104,9 +104,7 @@ class Plan:
                 result.append(func(*arg, **kwarg))
         else:
             # run in worker
-            print('run in worker')
             result = self._worker.run()
-            print(f'result: {result}')
 
         # return result. if only one ,return one
         if len(result) == 1:

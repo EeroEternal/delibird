@@ -17,4 +17,9 @@ class Single(Worker):
                 args = task[1]
                 kwargs = task[2]
                 result.append(func(*args, **kwargs))
+
+        # clean worker
+        self.clean()
+
+        # return result
         return result

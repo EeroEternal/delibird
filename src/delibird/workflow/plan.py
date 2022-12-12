@@ -36,12 +36,7 @@ class Plan:
             self._worker.add(self)
 
         # set task context
-        if context is None:
-            # copy current context
-            self._context = copy_context()
-        else:
-            # set given context
-            self._context = context
+        self._context = context or copy_context()
 
         # get global instance manager
         instance = Instance.get()

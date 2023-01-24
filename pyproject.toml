@@ -23,13 +23,6 @@ dependencies = [
     "pytz>=2022.2.6",
 ]
 
-build-dependencies = [
-    "setuptools >= 65",
-    "wheel",
-    'versioneer[toml]',
-    'tomli; python_version < "3.11"'
-]
-
 description = 'exchange data between database or parquet files'
 name = 'delibird'
 readme = "README.md"

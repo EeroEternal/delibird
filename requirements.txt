@@ -8,4 +8,4 @@ setuptools==66.1.1
 magicbag>=0.0.20
 psutil>=5.8.0
 uuid>=1.30
-
+versioneer==0.28

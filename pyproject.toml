@@ -2,7 +2,7 @@
 
 # [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools >= 65", "wheel"]
+requires = ["setuptools >= 65", "wheel", 'versioneer[toml]', 'tomli; python_version < "3.11"']
 
 [project]
 authors = [
@@ -24,7 +24,8 @@ dependencies = [
 ]
 description = 'exchange data between database or parquet files'
 name = 'delibird'
-version = '0.0.6'
+readme = "README.md"
+dynamic = ["version"]
 
 [project.urls]
 "Bug Tracker" = "https://github.com/lipicoder/delibird/issues"
@@ -32,6 +33,17 @@ version = '0.0.6'
 
 [project.scripts]
 delibird = "delibird.cli:cli"
+
+# See the docstring in versioneer.py for instructions. Note that you must
+# re-run 'versioneer.py setup' after changing this section, and commit the
+# resulting files.
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "src/delibird/_version.py"
+versionfile_build = "delibird/_version.py"
+tag_prefix = ""
+parentdir_prefix = "delibird-"
 
 [tool.setuptools.packages.find]
 where = ["src"]

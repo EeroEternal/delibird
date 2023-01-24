@@ -45,9 +45,6 @@ versionfile_build = "delibird/_version.py"
 tag_prefix = ""
 parentdir_prefix = "delibird-"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
 

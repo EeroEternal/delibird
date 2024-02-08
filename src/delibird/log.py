@@ -53,7 +53,7 @@ class Log:
         console_handler.setFormatter(formatter)
 
         # 创建文件处理器并设置日志文件路径
-        log_file_path = get_log_path("llmproxy")
+        log_file_path = get_log_path("delibird")
         file_handler = logging.FileHandler(log_file_path)
         file_handler.setFormatter(formatter)
 

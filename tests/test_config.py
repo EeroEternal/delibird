@@ -1,4 +1,4 @@
-from llmproxy.config import read_config
+from delibird.config import read_config
 
 
 def test_config():

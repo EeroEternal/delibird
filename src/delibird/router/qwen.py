@@ -4,7 +4,7 @@ import platform
 from fastapi.responses import StreamingResponse
 from http import HTTPStatus
 import dashscope
-from llmproxy.log import Log
+from delibird.log import Log
 
 
 class Qwen:
@@ -33,7 +33,7 @@ class Qwen:
             request: 请求参数.格式为 {"chat": messages, "model": "v15"}
         """
 
-        logger = Log("llmproxy")
+        logger = Log("delibird")
         # 检查配置文件和模型是否存在
         if not config:
             logger.echo("配置文件不存在", "error")
@@ -101,7 +101,7 @@ class Qwen:
 
 def send(config, request):
     """发送处理."""
-    logger = Log("llmproxy")
+    logger = Log("delibird")
 
     # 创建 Qwen 实例
     qwen = Qwen()

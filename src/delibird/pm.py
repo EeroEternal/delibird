@@ -3,12 +3,12 @@
 import os
 import subprocess
 from multiprocessing import Process, cpu_count
-from llmproxy.config import read_config
+from delibird.config import read_config
 
 
 def kill_process():
-    # Kill process named 'llmproxy' if it exists
-    os.system("pkill -f llmproxy")
+    # Kill process named 'delibird' if it exists
+    os.system("pkill -f delibird")
 
 
 def http_process(config_file, host, port):
@@ -26,7 +26,7 @@ def http_process(config_file, host, port):
         "uvicorn.workers.UvicornWorker",
         "-b",
         f"{host}:{port}",
-        "llmproxy.server:app",
+        "delibird.server:app",
         "--timeout",
         "60",
     ]

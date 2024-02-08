@@ -1,5 +1,5 @@
 from .base import StreamBase
-from llmproxy.log import Log
+from delibird.log import Log
 import websocket
 import json
 
@@ -29,7 +29,7 @@ class WsStream(StreamBase):
 
     async def _spark_send(self, messages, model, app_id):
         """星火大模型发送处理."""
-        logger = Log("llmproxy")
+        logger = Log("delibird")
         websocket.enableTrace(False)
 
         self.websocket = websocket.create_connection(self.url)

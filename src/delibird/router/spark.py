@@ -15,10 +15,10 @@ from websocket import create_connection
 import websocket
 from wsgiref.handlers import format_date_time
 from fastapi.responses import StreamingResponse
-from llmproxy.log import Log
+from delibird.log import Log
 from time import sleep
 import asyncio
-from llmproxy.stream import WsStream
+from delibird.stream import WsStream
 
 
 class Spark:
@@ -39,7 +39,7 @@ class Spark:
             config: 配置文件
             request: 请求参数.格式为 {"chat": messages, "model": "v15"}
         """
-        logger = Log("llmproxy")
+        logger = Log("delibird")
         if not self.config:
             logger.echo("配置文件不存在", "error")
             return False

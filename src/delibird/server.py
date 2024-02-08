@@ -6,9 +6,9 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from llmproxy.router import spark_send, qwen_send
-from llmproxy.config import read_config
-from llmproxy.log import Log
+from delibird.router import spark_send, qwen_send
+from delibird.config import read_config
+from delibird.log import Log
 
 
 app = FastAPI()

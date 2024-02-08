@@ -1,5 +1,8 @@
-# datasets
-datasets/
+# zed
+.zed/
+
+# api key file
+key.toml
 
 .DS_Store
 

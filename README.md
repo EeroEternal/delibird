@@ -1,4 +1,4 @@
-# delibird: a transformer between database and Parquet file
+# delibird: LLM unified server
 
 ## Introduction:
 
@@ -294,4 +294,3 @@ python >= 3.10
 ## License
 
 Apache License 2.0
-

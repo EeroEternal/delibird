@@ -4,19 +4,16 @@ from setuptools import find_packages, setup
 import versioneer
 
 # pylint: disable=invalid-name
-long_desc = """delibird is a python tool library based on Python pyarrow \
-which supports multithread and asynchronous calls. \
-It can help users transform data 
-between database and Parquet files."""
+long_desc = """Deliberd is a comprehensive program that serves as a unified gateway to a multitude of large-scale models. It supports a wide array of domestic major models such as QianWen, Wenxin, XingHuo, and BaiChuan, thereby enabling seamless interaction and access to these leading AI models within China's landscape."""
 
 setup(
     name="delibird",
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
-    url="https://github.com/lipicoder/delibird",
-    author="lipi,zhujw",
-    author_email="lipicoder@qq.com, kratoswittgenstein@gmail.com",
-    description="Exchange data between database and parquet files",
+    url="https://github.com/EeroEternal/delibird",
+    author="lipi",
+    author_email="lipicoder@qq.com",
+    description="LLM unified server",
     long_description=long_desc,
     zip_safe=True,
     classifiers=[

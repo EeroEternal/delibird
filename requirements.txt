@@ -4,3 +4,5 @@ websocket-client==1.7.0
 click==8.1.7
 dashscope==1.14.1
 psutil==5.9.8
+versioneer==0.29
+setuptools==69.0.3

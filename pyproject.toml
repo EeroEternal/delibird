@@ -3,7 +3,7 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [
-    "setuptools >= 65",
+    "setuptools",
     "wheel",
     'versioneer[toml]',
     'tomli; python_version < "3.11"',

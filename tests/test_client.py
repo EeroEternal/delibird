@@ -40,6 +40,6 @@ def test_client():
     """Test client."""
 
     # test client request
-    asyncio.run(fetch_streaming_response("qwen", "qwen-max"))
+    # asyncio.run(fetch_streaming_response("qwen", "qwen-max"))
 
-    # asyncio.run(fetch_streaming_response("spark", "v35"))
+    asyncio.run(fetch_streaming_response("spark", "v35"))

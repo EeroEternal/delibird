@@ -45,12 +45,7 @@ parentdir_prefix = "delibird-"
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
 
-authors = [{ name = "lipi", email = "lipicoder@qq.com" }]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
+
 [tool.isort]
 profile = 'black'
 

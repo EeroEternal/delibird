@@ -68,12 +68,11 @@ class Qwen:
 
         return True
 
-    async def send(self, chunk_size=24):
+    async def send(self):
         """发送.
 
         Args:
             data: 发送的数据，json 格式
-            chunk_size: 流式读取分块的大小
         """
         responses = dashscope.Generation.call(
             self.model,

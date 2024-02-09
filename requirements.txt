@@ -6,3 +6,4 @@ dashscope==1.14.1
 psutil==5.9.8
 versioneer==0.29
 setuptools==69.0.3
+aiohttp==3.9.3

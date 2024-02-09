@@ -6,7 +6,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from delibird.router import spark_send, qwen_send
+from delibird.router import spark_send, qwen_send, ernie_send
 from delibird.config import read_config
 from delibird.log import Log
 
@@ -61,3 +61,6 @@ async def chat_completion(maas: str, request: dict):
 
     if maas == "qwen":
         return qwen_send(config, request)
+
+    if maas == "ernie":
+        return ernie_send(config, request)

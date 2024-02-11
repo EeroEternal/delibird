@@ -26,9 +26,6 @@ class Spark:
         self.app_id = None
         self.api_key = None
         self.api_secret = None
-        self.url = ""
-        self.model = None
-        self.messages = None
         self.config = config
         self.request = request
 
@@ -37,38 +34,38 @@ class Spark:
 
         Args:
             config: 配置文件
-            request: 请求参数.格式为 {"chat": messages, "model": "v15"}
+            request: 请求参数.格式为 {"chat": messages, "modal": "v15"}
         """
         logger = Log("delibird")
         if not self.config:
             logger.echo("配置文件不存在", "error")
             return False
 
-        model = self.request.get("model")
-        if not model:
-            logger.echo("model 不存在", "error")
+        modal = self.request.get("modal")
+        if not modal:
+            logger.echo("modal 不存在", "error")
             return False
 
         spark_config = self.config.get("spark")
-        if not spark_config or model not in spark_config:
+        if not spark_config or modal not in spark_config:
             logger.echo("spark 配置项不存在", "error")
             return False
 
-        model_config = spark_config.get(model)
+        modal_config = spark_config.get(modal)
         required_keys = ["version", "app_id", "api_key", "api_secret", "url"]
 
         # 检查并设置必要配置项
         for key in required_keys:
-            value = model_config.get(key)
+            value = modal_config.get(key)
             if not value:
-                logger.echo(f"{key} 在 {model} 配置项下不能为空", "error")
+                logger.echo(f"{key} 在 {modal} 配置项下不能为空", "error")
                 return False
 
-        self.model = model_config.get("version")
-        self.app_id = model_config.get("app_id")
-        self.api_key = model_config.get("api_key")
-        self.api_secret = model_config.get("api_secret")
-        self.url = model_config.get("url")
+        self.modal = modal_config.get("version")
+        self.app_id = modal_config.get("app_id")
+        self.api_key = modal_config.get("api_key")
+        self.api_secret = modal_config.get("api_secret")
+        self.url = modal_config.get("url")
 
         # 检查是否存在 chat 字段
         if "chat" not in self.request:
@@ -144,7 +141,7 @@ class Spark:
         # 实例化 WsStream
         ws = WsStream(url)
 
-        async for message in ws.send(self.messages, "spark", self.model, self.app_id):
+        async for message in ws.send(self.messages, "spark", self.modal, self.app_id):
             # 检查是否需要关闭连接
             if message == "#finished#" or message == "#None#":
                 ws.close()

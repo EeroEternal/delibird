@@ -2,21 +2,20 @@
 from delibird.log import Log
 import aiohttp
 import json
+from .base import Base
 from fastapi.responses import StreamingResponse
 
 
-class Ernie:
+class Ernie(Base):
     def __init__(self):
         self.access_token = ""
-        self.messages = ""
-        self.url = ""
 
     def read_config(self, config, request):
         """读取配置文件.
 
         Args:
             config: 配置文件
-            request: 请求参数.格式为 {"chat": messages, "model": "v15"}
+            request: 请求参数.格式为 {"chat": messages, "modal": "v15"}
         return:
             bool
         """
@@ -44,10 +43,14 @@ class Ernie:
             return False
 
         # get modal name
-        modal = request.get("model")
+        modal = request.get("modal")
         if not modal:
-            logger.echo("model 不存在", "error")
+            logger.echo("modal 不存在", "error")
             return False
+
+        self.modal = modal
+
+        print(f"modal: {modal}")
 
         # get modal config
         modal_config = config.get("ernie").get(modal)
@@ -72,6 +75,7 @@ class Ernie:
             return False
 
         self.messages = request.get("chat")
+        return True
 
     async def send(self, chunk_size=512):
         """发送.
@@ -97,13 +101,19 @@ class Ernie:
                     data = data[:-2]
 
                     # 将 json 字符串转换为字典
-                    data = json.loads(data)
+                    try:
+                        data = json.loads(data)
 
-                    # 获取 data 中 result 字段返回
-                    result = data.get("result")
+                        # 获取 data 中 result 字段返回
+                        result = data.get("result")
 
-                    # 返回 result 字段
-                    yield result
+                        # 返回 result 字段
+                        yield result
+
+                    except json.JSONDecodeError as e:
+                        logger = Log("delibird")
+                        logger.echo(f"json 解析错误: {e}", "error")
+                        yield ""
 
 
 def send(config, request):
@@ -111,7 +121,7 @@ def send(config, request):
 
     Args:
         config: 配置文件
-        request: 请求参数.格式为 {"chat": messages, "model": "v15"}
+        request: 请求参数.格式为 {"chat": messages, "modal": "turbo"}
     """
     ernie = Ernie()
     logger = Log("delibird")

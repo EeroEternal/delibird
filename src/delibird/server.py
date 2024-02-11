@@ -52,7 +52,7 @@ async def chat_completion(maas: str, request: dict):
 
     Args:
         maas (str): llm 服务.例如 spark、openai、qwen等，代表各种模型路由
-        request (object): 类似 {"chat": messages, "model": "v15"}
+        request (object): 类似 {"chat": messages, "modal": "v15"}
     """
     global config
 
@@ -63,4 +63,5 @@ async def chat_completion(maas: str, request: dict):
         return qwen_send(config, request)
 
     if maas == "ernie":
+        print("ernie")
         return ernie_send(config, request)

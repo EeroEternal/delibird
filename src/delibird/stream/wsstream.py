@@ -9,17 +9,17 @@ class WsStream(StreamBase):
         self.url = url
         self.websocket = None  # websocket hanlder
 
-    async def send(self, data, protocol, model, app_id=None):
+    async def send(self, data, protocol, modal, app_id=None):
         """发送消息.
 
         Args:
             data: 发送的内容
             protocol: 协议。基于 websocket 上的应用层解析协议
-            model: 模型名称
+            modal: 模型名称
             app_id: 应用 id，可选
         """
         if protocol == "spark":
-            async for result in self._spark_send(data, model, app_id):
+            async for result in self._spark_send(data, modal, app_id):
                 yield result
 
     def close(self):
@@ -27,7 +27,7 @@ class WsStream(StreamBase):
         if self.websocket is not None:
             self.websocket.close()
 
-    async def _spark_send(self, messages, model, app_id):
+    async def _spark_send(self, messages, modal, app_id):
         """星火大模型发送处理."""
         logger = Log("delibird")
         websocket.enableTrace(False)
@@ -35,7 +35,7 @@ class WsStream(StreamBase):
         self.websocket = websocket.create_connection(self.url)
 
         # json 解析
-        data = json.dumps(gen_params(appid=app_id, messages=messages, version=model))
+        data = json.dumps(gen_params(appid=app_id, messages=messages, version=modal))
 
         async for result in self._send(data):
             if result == "#None#":

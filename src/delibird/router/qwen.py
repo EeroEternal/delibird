@@ -11,26 +11,17 @@ class Qwen:
     """Qwen 接口."""
 
     def __init__(self):
-        """初始化.
-
-        Args:
-            protocol: 协议。http https websocket
-            model: 模型名称
-            api_key: api key
-            url: 请求地址
-        """
+        """初始化."""
         self.api_key = ""
         self.config = None
         self.request = None
-        self.messages = ""
-        self.model = ""
 
     def read_config(self, config, request):
         """读取配置文件.
 
         Args:
             config: 配置文件
-            request: 请求参数.格式为 {"chat": messages, "model": "v15"}
+            request: 请求参数.格式为 {"chat": messages, "modal": "v15"}
         """
 
         logger = Log("delibird")
@@ -39,25 +30,26 @@ class Qwen:
             logger.echo("配置文件不存在", "error")
             return False
 
-        model = request.get("model")
-        if not model:
-            logger.echo("model 不存在", "error")
+        modal = request.get("modal")
+        if not modal:
+            logger.echo("modal 不存在", "error")
             return False
 
         # 读取配置文件
         qwen_config = config.get("qwen")
-        if not qwen_config or model not in qwen_config:
+        if not qwen_config or modal not in qwen_config:
             logger.echo("qwen 配置项不存在", "error")
             return False
 
-        model_config = qwen_config.get(model)
+        modal_config = qwen_config.get(modal)
         # check api_key
-        if not model_config.get("api_key"):
+        if not modal_config.get("api_key"):
             logger.echo("api_key 不能为空", "error")
             return False
 
-        self.api_key = model_config.get("api_key")
-        self.model = model
+        self.api_key = modal_config.get("api_key")
+        # modal 是 max，需要加上 qwen 前缀
+        self.modal = "qwen-" + modal
 
         # 检查是否存在 chat 字段
         if "chat" not in request:
@@ -74,8 +66,9 @@ class Qwen:
         Args:
             data: 发送的数据，json 格式
         """
+        print(f"modal: {self.modal}")
         responses = dashscope.Generation.call(
-            self.model,
+            self.modal,
             messages=self.messages,
             result_format="message",  # set the result to be "message" format.
             stream=True,

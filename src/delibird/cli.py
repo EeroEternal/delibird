@@ -64,6 +64,11 @@ def stop():
     logger.echo("Stopping...")
     click.echo("Stopping...")
 
+    # check if the program is running
+    if not check_process("delibird"):
+        click.echo("The program is not running")
+        return
+
     # kill the process
     kill_process()
 

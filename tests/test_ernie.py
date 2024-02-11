@@ -9,19 +9,22 @@ async def stream_fetch(url, messages):
 
     async with aiohttp.ClientSession() as session:
         async with session.post(url, json=json_data) as response:
-            async for chunk in response.content.iter_chunked(1024):
+            async for chunk in response.content.iter_chunked(2048):
                 data = chunk.decode("utf-8")
 
                 # 去掉开头的 data: 字符串
-                data = data[5:]
-
-                # 去掉结尾的 \n 字符串
-                data = data[:-2]
+                data = data.strip()
+                data = data.lstrip("data: ")
+                data = data.rstrip("\n")
 
                 # decode to json
-                json_data = json.loads(data)
+                try:
+                    json_data = json.loads(data)
+                except json.JSONDecodeError as e:
+                    print(f"json error: {e}")
+                    result = ""
+
                 result = json_data.get("result")
-                print(f"result: {result}")
 
 
 def test_ernie():

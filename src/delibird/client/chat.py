@@ -20,7 +20,7 @@ class Chat:
         """请求和流式响应."""
 
         # 用 messages 构建一个请求参数, 读取 spark v35 模型，对应 toml 配置文件中的 spark 配置项
-        json_data = {"chat": messages, "model": self.modal}
+        json_data = {"chat": messages, "modal": self.modal}
         async with aiohttp.ClientSession() as session:
             async with session.post(
                 url,

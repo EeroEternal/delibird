@@ -71,6 +71,7 @@ class Base:
             if not data:
                 # 关闭 websocket 连接
                 ws_handler.close()
+                break
 
             yield data
 

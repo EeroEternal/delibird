@@ -109,7 +109,7 @@ class Spark(Base):
         **kwargs,
     ):
         # 生成 url
-        url = self._create_url()
+        self.url = self._create_url()
 
         # 准备数据
         data = self._prepare_data(messages)
@@ -118,12 +118,14 @@ class Spark(Base):
         async for result in super().send(data, protocol="websocket"):
             # 处理返回的数据
             async for filter_data in self._process_data(result):
-                if filter_data:
-                    yield filter_data
-                else:
-                    break
+                yield filter_data
 
     async def _process_data(self, data):
+        # 如果 data 为空，直接返回空
+        if not data:
+            print(f'return ""')
+            yield ""
+
         logger = Log("delibird")
         json_result = json.loads(data)
 

@@ -1,14 +1,59 @@
 """抽象类"""
 
-from abc import ABC, abstractmethod
+import aiohttp
 
 
-class Base(ABC):
+class Base:
     def __init__(self):
         self.url = ""
-        self.messages = ""
         self.modal = None
 
-    @abstractmethod
-    def send(self):
-        pass
+    async def send(self, messages, chunk_size=512):
+        """发送.
+
+        Args:
+            messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
+            chunk_size: 流式读取分块的大小。百度返回的是一个 json 结构
+        """
+        if not self.url:
+            raise ValueError("url 不能为空")
+
+        # send request
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                self.url, json={"messages": messages, "stream": True}
+            ) as response:
+                async for chunk in response.content.iter_chunked(chunk_size):
+                    data = chunk.decode("utf-8")
+
+                    yield data
+
+    def read_config(self, config, router, modal):
+        """读取配置文件.
+
+        Args:
+            config: Dict[str, Any], 读取的配置文件内容
+            router: str, qwen, spark, ernie 或者其他
+            modal: str, 模型名称
+        return:
+            (bool,str): (True, "success") or (False, "error message")
+        """
+        if not config:
+            return (False, "config is None")
+
+        if not config.get(router):
+            return (False, "router is None")
+
+        self.modal = modal
+
+        # router config
+        router_config = config.get(router)
+        if not router_config:
+            return (False, "router config is None")
+
+        # get modal config
+        modal_config = router_config.get(modal)
+        if not modal_config:
+            return (False, "modal config is None")
+
+        return (True, "success")

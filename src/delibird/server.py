@@ -63,5 +63,4 @@ async def chat_completion(maas: str, request: dict):
         return qwen_send(config, request)
 
     if maas == "ernie":
-        print("ernie")
         return ernie_send(config, request)

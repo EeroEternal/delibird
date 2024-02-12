@@ -10,7 +10,7 @@ class Chat:
 
     Args:
         router: 服务名称,例如: qwen
-        modal: 模型名称，例如: qwen-max
+        modal: 模型名称，例如: max
     """
 
     def __init__(self, modal):

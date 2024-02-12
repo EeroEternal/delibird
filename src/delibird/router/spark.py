@@ -1,5 +1,4 @@
 from contextlib import closing
-import _thread as thread
 import asyncio
 import base64
 import datetime
@@ -18,38 +17,29 @@ from fastapi.responses import StreamingResponse
 from delibird.log import Log
 from time import sleep
 import asyncio
-from delibird.stream import WsStream
+from .base import Base
+from delibird.log import Log
 
 
-class Spark:
-    def __init__(self, config, request):
-        self.app_id = None
-        self.api_key = None
-        self.api_secret = None
-        self.config = config
-        self.request = request
+class Spark(Base):
+    def __init__(self):
+        super().__init__()
+        # spark 版本
+        self.version = ""
 
-    def read_config(self):
+    def read_config(self, config, modal):
         """读取配置文件.
 
         Args:
             config: 配置文件
-            request: 请求参数.格式为 {"chat": messages, "modal": "v15"}
+            modal: 模型名称。格式为 v35、v30、v20、v15
         """
-        logger = Log("delibird")
-        if not self.config:
-            logger.echo("配置文件不存在", "error")
-            return False
+        # 执行父类的 read_config 方法
+        result = super().read_config(config, "spark", modal)
 
-        modal = self.request.get("modal")
-        if not modal:
-            logger.echo("modal 不存在", "error")
-            return False
-
-        spark_config = self.config.get("spark")
+        spark_config = config.get("spark")
         if not spark_config or modal not in spark_config:
-            logger.echo("spark 配置项不存在", "error")
-            return False
+            return (False, "spark 配置项不存在")
 
         modal_config = spark_config.get(modal)
         required_keys = ["version", "app_id", "api_key", "api_secret", "url"]
@@ -58,23 +48,16 @@ class Spark:
         for key in required_keys:
             value = modal_config.get(key)
             if not value:
-                logger.echo(f"{key} 在 {modal} 配置项下不能为空", "error")
-                return False
+                return (False, f"{key} 在 {modal} 配置项下不能为空")
 
-        self.modal = modal_config.get("version")
+        self.version = modal_config.get("version")
+
         self.app_id = modal_config.get("app_id")
         self.api_key = modal_config.get("api_key")
         self.api_secret = modal_config.get("api_secret")
         self.url = modal_config.get("url")
 
-        # 检查是否存在 chat 字段
-        if "chat" not in self.request:
-            logger.echo("请求参数中不存在 chat 字段", "error")
-            return False
-
-        self.messages = self.request["chat"]
-
-        return True
+        return (True, "success")
 
     def _create_url(self):
         """生成 websocket url."""
@@ -122,32 +105,61 @@ class Spark:
 
     async def send(
         self,
-        n=1,
-        frequency_penalty=0,
-        logit_bias=None,
-        logprobs=False,
-        presence_penalty=0,
-        stop=None,
-        stream=False,
-        temperature=1,
-        top_p=1,
+        messages,
         **kwargs,
     ):
-        # 从 kwargs 获取 max_tokens 参数
-        max_tokens = kwargs.get("max_tokens", 2048)
-
+        # 生成 url
         url = self._create_url()
 
-        # 实例化 WsStream
-        ws = WsStream(url)
+        # 准备数据
+        data = self._prepare_data(messages)
 
-        async for message in ws.send(self.messages, "spark", self.modal, self.app_id):
-            # 检查是否需要关闭连接
-            if message == "#finished#" or message == "#None#":
-                ws.close()
-                break
+        # 执行父类的 send 方法，发送数据
+        async for result in super().send(data, protocol="websocket"):
+            # 处理返回的数据
+            async for filter_data in self._process_data(result):
+                if filter_data:
+                    yield filter_data
+                else:
+                    break
 
-            yield message
+    async def _process_data(self, data):
+        logger = Log("delibird")
+        json_result = json.loads(data)
+
+        # 检查是否存在 header 字段
+        if "header" not in json_result:
+            logger.echo("缺少 header 字段", "error")
+            # 返回空，super 会关闭 websocket
+            yield ""
+
+        # 检查是否存在 code 字段
+        if "code" not in json_result["header"]:
+            logger.echo("缺少 code 字段", "error")
+            yield ""
+
+        code = json_result["header"]["code"]
+
+        if code != 0:
+            logger.echo(f"code error: {code}", "error")
+            yield ""
+
+        choices = json_result["payload"]["choices"]
+        status = choices["status"]
+        content = choices["text"][0]["content"]
+
+        if status == 2:
+            yield ""
+
+        # 返回内容
+        yield content
+
+    def _prepare_data(self, messages):
+        """把 messages 转化为 spark 需要的 json 格式"""
+        # 转换 messages 为 json 格式
+        return json.dumps(
+            gen_params(appid=self.app_id, messages=messages, version=self.version)
+        )
 
 
 def send(config, request):
@@ -155,14 +167,55 @@ def send(config, request):
     发送消息
     """
     # 创建 Spark 实例
-    spark = Spark(config, request)
+    spark = Spark()
+
+    # 从 request 中获取 modal 和 messages
+    modal = request.get("modal")
+    messages = request.get("chat")
 
     # 读取配置文件
-    if not spark.read_config():
-        return {"error": "配置文件错误"}
+    result, message = spark.read_config(config, modal)
+    if not result:
+        return message
 
     # 流式请求
     return StreamingResponse(
-        spark.send(),
+        spark.send(messages),
         media_type="text/event-stream",
     )
+
+
+def gen_params(appid, messages, version, max_tokens=2048, top_k=4, chat_id=None):
+    """
+    通过appid和用户的提问来生成请参数
+
+    appid: str, 用户的appid
+    question: str, 用户的提问
+    version: str, 星火的版本：
+        general 指向V1.5版本;
+        generalv2 指向V2版本;
+        generalv3 指向V3版本;
+        generalv3.5 指向V3.5版本;
+    max_tokens: int, 最大生成长度
+        V1.5 取值范围为[1,4096]
+        V2.0、V3.0和V3.5 取值范围为[1,8192]，默认为2048。
+    top_k: int, 从k个候选中随机选择⼀个（⾮等概率） 取值为[1，6],默认为4
+
+    messages:
+        包含 role 和 content 的列表，role 为system、 user 、assistant，content 为消息内容
+    """
+
+    # 拼接请求参数
+    data = {
+        "header": {"app_id": appid},
+        "parameter": {
+            "chat": {"domain": version, "max_tokens": max_tokens, "top_k": top_k}
+        },
+        "payload": {"message": {"text": messages}},
+    }
+
+    # 如果 chat_id 不为空，则添加到请求参数中
+    if chat_id:
+        data["parameter"]["chat"]["chat_id"] = chat_id
+
+    return data

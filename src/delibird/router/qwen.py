@@ -23,7 +23,7 @@ class Qwen(Base):
             config: 配置文件
             modal: 模型名称。格式为 max、min、speed、turbo
         """
-        # modal 是 max，需要加上 qwen 前缀
+        # 执行父类的 read_config 方法
         result, message = super().read_config(config, "qwen", modal)
 
         if not result:

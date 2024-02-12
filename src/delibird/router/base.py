@@ -1,6 +1,7 @@
 """抽象类"""
 
 import aiohttp
+import websocket
 
 
 class Base:
@@ -8,7 +9,26 @@ class Base:
         self.url = ""
         self.modal = None
 
-    async def send(self, messages, chunk_size=512):
+    async def send(self, messages, chunk_size=512, protocol="http"):
+        """发送.
+
+        Args:
+            messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
+            chunk_size: 流式读取分块的大小。百度返回的是一个 json 结构
+            protocol: 请求协议 http 或者 websocket
+        """
+        if not self.url:
+            raise ValueError("url 不能为空")
+
+        if protocol == "http":
+            async for data in self._http_send(messages, chunk_size):
+                yield data
+
+        if protocol == "websocket":
+            async for data in self._websocket_send(messages):
+                yield data
+
+    async def _http_send(self, messages, chunk_size=512):
         """发送.
 
         Args:
@@ -27,6 +47,32 @@ class Base:
                     data = chunk.decode("utf-8")
 
                     yield data
+
+    async def _websocket_send(self, messages):
+        """发送.
+
+        Args:
+            messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
+        """
+        if not self.url:
+            raise ValueError("url 不能为空")
+
+        ws_handler = websocket.create_connection(self.url)
+
+        if not ws_handler:
+            raise ValueError("websocket 连接失败")
+
+        ws_handler.send(messages)
+
+        while True:
+            data = ws_handler.recv()
+
+            # 如果 data 为空，说明已经接收完毕
+            if not data:
+                # 关闭 websocket 连接
+                ws_handler.close()
+
+            yield data
 
     def read_config(self, config, router, modal):
         """读取配置文件.

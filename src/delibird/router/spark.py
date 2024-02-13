@@ -24,38 +24,30 @@ from delibird.log import Log
 class Spark(Base):
     def __init__(self):
         super().__init__()
-        # spark 版本
-        self.version = ""
 
-    def read_config(self, config, modal):
+    def read_config(self, config):
         """读取配置文件.
 
         Args:
             config: 配置文件
-            modal: 模型名称。格式为 v35、v30、v20、v15
         """
         # 执行父类的 read_config 方法
-        result = super().read_config(config, "spark", modal)
+        result, message = super().read_config(config)
+        if not result:
+            return (result, message)
 
-        spark_config = config.get("spark")
-        if not spark_config or modal not in spark_config:
-            return (False, "spark 配置项不存在")
-
-        modal_config = spark_config.get(modal)
-        required_keys = ["version", "app_id", "api_key", "api_secret", "url"]
+        required_keys = ["app_id", "api_key", "api_secret", "url"]
 
         # 检查并设置必要配置项
         for key in required_keys:
-            value = modal_config.get(key)
+            value = config.get(key)
             if not value:
-                return (False, f"{key} 在 {modal} 配置项下不能为空")
+                return (False, f"{key} 不能为空")
 
-        self.version = modal_config.get("version")
-
-        self.app_id = modal_config.get("app_id")
-        self.api_key = modal_config.get("api_key")
-        self.api_secret = modal_config.get("api_secret")
-        self.url = modal_config.get("url")
+        self.app_id = config.get("app_id")
+        self.api_key = config.get("api_key")
+        self.api_secret = config.get("api_secret")
+        self.url = config.get("url")
 
         return (True, "success")
 
@@ -105,9 +97,13 @@ class Spark(Base):
 
     async def send(
         self,
+        model,
         messages,
         **kwargs,
     ):
+        # 设置 model
+        self.model = model
+
         # 生成 url
         self.url = self._create_url()
 
@@ -115,7 +111,7 @@ class Spark(Base):
         data = self._prepare_data(messages)
 
         # 执行父类的 send 方法，发送数据
-        async for result in super().send(data, protocol="websocket"):
+        async for result in super().send(data, model, protocol="websocket"):
             # 处理返回的数据
             async for filter_data in self._process_data(result):
                 yield filter_data
@@ -160,40 +156,17 @@ class Spark(Base):
         """把 messages 转化为 spark 需要的 json 格式"""
         # 转换 messages 为 json 格式
         return json.dumps(
-            gen_params(appid=self.app_id, messages=messages, version=self.version)
+            gen_params(appid=self.app_id, messages=messages, model=self.model)
         )
 
 
-def send(config, request):
-    """
-    发送消息
-    """
-    # 创建 Spark 实例
-    spark = Spark()
-
-    # 从 request 中获取 modal 和 messages
-    modal = request.get("modal")
-    messages = request.get("chat")
-
-    # 读取配置文件
-    result, message = spark.read_config(config, modal)
-    if not result:
-        return message
-
-    # 流式请求
-    return StreamingResponse(
-        spark.send(messages),
-        media_type="text/event-stream",
-    )
-
-
-def gen_params(appid, messages, version, max_tokens=2048, top_k=4, chat_id=None):
+def gen_params(appid, messages, model, max_tokens=2048, top_k=4, chat_id=None):
     """
     通过appid和用户的提问来生成请参数
 
     appid: str, 用户的appid
     question: str, 用户的提问
-    version: str, 星火的版本：
+    model: str, 星火的模型版本：
         general 指向V1.5版本;
         generalv2 指向V2版本;
         generalv3 指向V3版本;
@@ -211,7 +184,7 @@ def gen_params(appid, messages, version, max_tokens=2048, top_k=4, chat_id=None)
     data = {
         "header": {"app_id": appid},
         "parameter": {
-            "chat": {"domain": version, "max_tokens": max_tokens, "top_k": top_k}
+            "chat": {"domain": model, "max_tokens": max_tokens, "top_k": top_k}
         },
         "payload": {"message": {"text": messages}},
     }

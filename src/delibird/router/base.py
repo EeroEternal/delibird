@@ -7,18 +7,23 @@ import websocket
 class Base:
     def __init__(self):
         self.url = ""
-        self.modal = None
+        self.api_key = ""
+        self.model = ""
 
-    async def send(self, messages, chunk_size=512, protocol="http"):
+    async def send(self, messages, model, chunk_size=512, protocol="http"):
         """发送.
 
         Args:
             messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
+            model: 对应的模型名称。格式为例如 qwen 就是 qwen-max、qwen-min、qwen-speed、qwen-turbo
             chunk_size: 流式读取分块的大小。百度返回的是一个 json 结构
             protocol: 请求协议 http 或者 websocket
         """
         if not self.url:
             raise ValueError("url 不能为空")
+
+        # 设置 model 名称，作为子类拼接 url 使用
+        self.model = model
 
         if protocol == "http":
             async for data in self._http_send(messages, chunk_size):
@@ -28,11 +33,12 @@ class Base:
             async for data in self._websocket_send(messages):
                 yield data
 
-    async def _http_send(self, messages, chunk_size=512):
+    async def _http_send(self, messages, model, chunk_size=512):
         """发送.
 
         Args:
             messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
+            model: 对应的模型名称。格式为例如 qwen 就是 qwen-max、qwen-min、qwen-speed、qwen-turbo
             chunk_size: 流式读取分块的大小。百度返回的是一个 json 结构
         """
         if not self.url:
@@ -75,32 +81,19 @@ class Base:
 
             yield data
 
-    def read_config(self, config, router, modal):
-        """读取配置文件.
+    def read_config(self, config):
+        """读取配置.
 
         Args:
-            config: Dict[str, Any], 读取的配置文件内容
-            router: str, qwen, spark, ernie 或者其他
-            modal: str, 模型名称
+            config: Dict[str, Any], 对应的配置
         return:
             (bool,str): (True, "success") or (False, "error message")
         """
         if not config:
             return (False, "config is None")
 
-        if not config.get(router):
-            return (False, "router is None")
-
-        self.modal = modal
-
-        # router config
-        router_config = config.get(router)
-        if not router_config:
-            return (False, "router config is None")
-
-        # get modal config
-        modal_config = router_config.get(modal)
-        if not modal_config:
-            return (False, "modal config is None")
+        # 读取 api_key
+        if not config.get("api_key"):
+            return (False, "api_key 不存在")
 
         return (True, "success")

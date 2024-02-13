@@ -6,14 +6,14 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from delibird.router import spark_send, qwen_send, ernie_send
 from delibird.config import read_config
 from delibird.log import Log
+from delibird.router import Gateway
 
 
 app = FastAPI()
 
-config = None
+router = Gateway()
 
 # Allow requests from any domain
 origins = ["*"]
@@ -31,9 +31,9 @@ app.add_middleware(
 @app.on_event("startup")
 def startup():
     """Startup."""
-    global config
+    global router
     config_file = os.getenv("CONFIG_FILE", "config.toml")
-    config = read_config(config_file)
+    router.read_config(config_file)
 
 
 @app.on_event("shutdown")
@@ -52,15 +52,15 @@ async def chat_completion(maas: str, request: dict):
 
     Args:
         maas (str): llm 服务.例如 spark、openai、qwen等，代表各种模型路由
-        request (object): 类似 {"chat": messages, "modal": "v15"}
+        request (object): 类似 {"chat": messages, "model": "v15"}
     """
-    global config
 
-    if maas == "spark":
-        return spark_send(config, request)
+    # get messages and model from request
+    messages = request.get("chat")
+    model = request.get("model")
 
-    if maas == "qwen":
-        return qwen_send(config, request)
+    # check if messages and model are not None
+    if not messages or not model:
+        return "messages or model is None"
 
-    if maas == "ernie":
-        return ernie_send(config, request)
+    return router.send(maas, messages, model)

@@ -1,0 +1,73 @@
+[server]
+host = "localhost"
+port = 8000
+
+[spark]
+name = "spark"
+
+[spark.v35]
+version = "generalv3.5"
+app_id = "XXX"
+api_key = "XXX"
+api_secret = "XXX"
+url = "wss://spark-api.xf-yun.com/v3.5/chat"
+
+
+[spark.v30]
+version = "generalv3"
+app_id = "XXX"
+api_key = "XXX"
+api_secret = "XXX"
+url = "wss://spark-api.xf-yun.com/v3.1/chat"
+
+[spark.v20]
+version = "generalv2"
+app_id = "XXX"
+api_key = "XXX"
+api_secret = "XXX"
+url = "wss://spark-api.xf-yun.com/v2.1/chat"
+
+[spark.v15]
+version = "general"
+app_id = "XXX"
+api_key = "XXX"
+api_secret = "XXX"
+url = "wss://spark-api.xf-yun.com/v1.1/chat"
+
+
+[qwen]
+name = "qwen"
+
+[qwen.max] # qwen-turbo, qwen-plus, qwen-max
+#http or websocket
+api_key = "XXX"
+
+[qwen.plus]
+api_key = "XXX"
+
+[qwen.turbo]
+api_key = "XXX"
+
+[ernie]
+appid = 123456678
+api_key = "XXX"
+secret_key = "XXX"
+url_prefix = "XXX"
+access_token = "XXX"
+# curl 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=[API Key]&client_secret=[Secret Key]'
+# 获取 access_token
+
+[ernie.v4]
+url_suffix = "completions_pro"
+
+[ernie.8k]
+url_suffix = "ernie_bot_8k"
+
+[ernie.bot]
+url_suffix = "completions"
+
+[ernie.speed]
+url_suffix = "ernie_speed"
+
+[ernie.turbo]
+url_suffix = "eb-instant"

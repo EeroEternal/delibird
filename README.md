@@ -1,296 +1,116 @@
-# delibird: LLM unified server
+<div align="center">
+  <picture>
+    <img alt="Delibird" src="images/describe.png" width=20%>
+  </picture>
+</div>
 
-## Introduction:
+---
+Delibird 是一个多合一大模型接口网关。主要针对国内的大模型，包括文心、百川、千问、星火、智谱等提供统一的接口调用。基于 Python 开发，容易集成。原生提供 Streaming 接口、多进程异步调度模式，性能较好、调用接口完全兼容 openai APi，方便集成。
 
-delibird is a python tool library based on Python pyarrow which supports multithread and asynchronous calls. It can help
-users transform data between database and Parquet files.
+## 特点
 
-## Features:
+- 完全 python 代码，容易修改和集成到项目中
+- 接口简单。兼容 openai 接口，一套接口调用全部模型
+- 支持 http、https 和 websocket 接口
+- 支持几乎全部国内大模型，包括文心、百川、千问、星火、智谱等
+- 支持 Streaming 接口，支持多轮对话
+- 采用 Python asyncio 原生异步和多进程模型，性能较好
 
-- Multithread: support batch reading/writeing and multithread functions an database table and Parquet files.
-- Read directory: reading all Parquet files in the giving directory and transform into database. One directory maps to
-  one database table.
-- Mock data: create Parquet files or database tables in a customized schema.
-- Workflow: giving a yaml file including your customized configurations, delibird can create a workflow to execute
-  multiple jobs.
+## 支持模型列表
 
-## Limits:
+- [通义千问](https://dashscope.console.aliyun.com/model)
+- [文心大模型](https://cloud.baidu.com/product/wenxinworkshop)
+- [星火大模型](https://xinghuo.xfyun.cn/sparkapi)
 
-- Only support Postgresql DB and Oracle DB by now.
+## 使用教程
 
-## Installation
+### 环境配置
 
-### source code
+建议基于 python 3.12 以上版本，可以获得更好的性能。具体依赖库可以参考 requirements.txt 文件。
 
-```bash
-git clone https://gitee.com/lipicoder/delibird.git
-cd delibird
-pip install -e .
+~~~shell
+pip install -r requirements.txt
+~~~
+
+### 安装
+
+通过 Pypi 安装
+
+~~~shell
+pip install delibird
+~~~
+
+### 运行
+
+启动服务之前需要配置一个配置文件，文件内设置好对应的模型端口和 api_key。配置文件格式如下：
+
+```toml
+[server]
+host = "localhost"
+port = 8000
+
+[spark]
+name = "spark"
+
+[spark.v35]
+version = "generalv3.5"
+app_id = "XXX"
+api_key = "XXX"
+api_secret = "XXX"
+url = "wss://spark-api.xf-yun.com/v3.5/chat"
+
+
+[spark.v30]
+version = "generalv3"
+app_id = "XXX"
+api_key = "XXX"
+api_secret = "XXX"
+url = "wss://spark-api.xf-yun.com/v3.1/chat"
+
+[qwen]
+name = "qwen"
+
+[qwen.max] # qwen-turbo, qwen-plus, qwen-max
+#http or websocket
+api_key = "XXX"
+
+[qwen.plus]
+api_key = "XXX"
+
+[ernie]
+appid = 123456678
+api_key = "XXX"
+secret_key = "XXX"
+url_prefix = "XXX"
+access_token = "XXX"
+# curl 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=[API Key]&client_secret=[Secret Key]'
+# 获取 access_token
+
+[ernie.v4]
+url_suffix = "completions_pro"
+
+[ernie.8k]
+url_suffix = "ernie_bot_8k"
 ```
 
-### Pypi
+替换掉上面的 "XXX" 为对应的 api_key 或者其他配置信息。"qwen.max" 后面的 max 代表模型名称，前面的 "qwen" 代表模型服务路由
 
-```bash
-$ python -m build
+然后运行服务
+
+```shell
+delibird start -c key.toml
+```
+key.toml 就是配置文件，可以带路径。例如，/home/aaa/delibird/key.toml
+
+停止服务
+
+```shell
+delibird stop
 ```
 
-### pip
+## 监控页面
 
-```bash
-$ pip install delibird
-```
 
-## Usage
 
-Input 'delibird' in command line. The usage lint will be displayed.
-
-```sh
-(.context) % delibird
-Usage: delibird [OPTIONS] COMMAND [ARGS]...
-
-  delibird command line interface.
-
-Options:
-  -h, --help  Show this message and exit.
-
-Commands:
-  mock      Mock data to directory , file, or database.
-  parquet   Write or read Parquet file or directory
-  workflow  Database and parquet data transform workflow.
-```
-
-### mock
-
-Example:
-
-```yaml
-# mock data workflow
-
-# workflow lists
-mocks:
-  - name: "mock-to-directory"
-    row-number: 2048
-    direction: "directory" # directory ,file or  table
-    directory: "./datasets/mock_data/mock_stocks"
-    columns: {
-      # stock code as a type
-      "sec_code": "code",  # "600001"
-      "date": "date",  # 2022-08-24
-      "close": "float",  # 16.87
-      "open": "float",  # 16.65
-      "high": "float",  # 16.95
-      "low": "float",  # 16.55
-      "hold": "decimal(10,5)",  # 123.25515
-      "time": "timestample(unit=s,tz=Asia/Shanghai)",
-      "volume": "int",  # 1530231
-      "amount": "int",  # 2571196416
-      "memo": "string", # hello
-    }
-
-  - name: "mock-to-file"
-    row-number: 2048
-    direction: "file" # directory, file or table
-    filepath: "./datasets/mock_data/mock_stocks.parquet"
-    columns: {
-      # stock code as a type
-      "sec_code": "code",  # "600001"
-      "date": "date",  # 2022-08-24
-      "close": "float",  # 16.87
-      "open": "float",  # 16.65
-      "high": "float",  # 16.95
-      "low": "float",  # 16.55
-      "hold": "decimal(10,5)",  # 123.25515
-      "time": "timestample(unit=s,tz=Asia/Shanghai)",
-      "volume": "int",  # 1530231
-      "amount": "int",  # 2571196416
-      "memo": "string", # hello
-    }
-
-  - name: "mock-to-table"
-    row-number: 204800
-    direction: "table" # directory ,file or table
-    engine: "postgresql"
-    dsn: "postgresql://test:test123@localhost:5432/delibird"
-    table-name: "mock_stocks"
-    columns: {
-      # stock code as a type
-      "sec_code": "code",  # "600001"
-      "date": "date",  # 2022-08-24
-      "close": "float",  # 16.87
-      "open": "float",  # 16.65
-      "high": "float",  # 16.95
-      "low": "float",  # 16.55
-      "hold": "decimal(10,5)",  # 123.25515
-      # datetime.datetime(2022,10,25).timestamp()
-      "time": "timestample(unit=s,tz=Asia/Shanghai)",
-      "volume": "int",  # 1530231
-      "amount": "int",  # 2571196416
-    }
-
-```
-
-```direction```  transform to which format. 'directory': a directory path. 'file': a file path. 'table': a database
-table name.
-
-```columns``` defination of the database table. Support standard data types of Postgresql or Oracle db, based on which
-database you choose. delibird will auto map the database data type to pyarrow row data type. 'code' means stock code,
-which would be removed later.
-
-execute mock workflow:
-
-```sh
-(.context) % delibird mock tests/yaml/mock_file.yaml
-write directory finished
-write parquet finished
-```
-
-### parquet
-
-Read data in database table and write data into a Parquet file or Parquet files in a directory. Or read data in a
-Parquet file or Parquet files in a directory and write data into a database table.
-
-```sh
-(.context) % delibird parquet
-Usage: delibird parquet [OPTIONS] COMMAND [ARGS]...
-
-  Write or read Parquet file or directory.
-
-Options:
-  -h, --help  Show this message and exit.
-
-Commands:
-  read   Read parquet file and write to database.
-  write  Read from database and write to parquet file.
-```
-
-#### **parquet read**
-
-Read data in a Parquet file or Parquet files in a directory and write data into a database table.
-
-```sh
-(.context) % delibird parquet read -h
-Usage: delibird parquet read [OPTIONS] [-e ENGINE] PATH DSN TABLE_NAME
-
-  Read parquet file, write to database.
-
-  dsn sample:postgresql://user:password@host:port/dbname.
-
-  engine [postgresql/oracle]
-
-Options:
-  -h, --help  Show this message and exit.
-```
-
-Example:
-
-```sh
-delibird parquet read datasets/mock_data/mock_stocks.parquet postgresql://test:test123@localhost:5432/delibird mock_stocks -e postgresql
-```
-
-#### **parquet write**:
-
-Read data in database table and write data into a Parquet file or Parquet files in a directory.
-
-**directory**.
-
-```sh
-(.context) % delibird parquet write -h
-Usage: delibird parquet write [OPTIONS]  [-e ENGINE] PATH DSN TABLE_NAME
-
-  Read from database and write to parquet file.
-
-  dsn sample:postgresql://user:password@host:port/dbname.
-
-  engine [postgresql/oracle]
-
-Options:
-  -s, --batch_size INTEGER
-  -h, --help                Show this message and exit.
-```
-
-Example:
-
-```sh
-delibird parquet write datasets/mock_data/mock_stocks_tmp postgresql://test:test123@localhost:5432/delibird mock_stocks -e postgresql
-```
-
-parquet write supports configuration of batch size
-
-```sh
-delibird parquet write -s 1024 -e postgresql datasets/mock_data/mock_stocks postgresql://test:test123@localhost:5432/delibird mock_stocks
-```
-
-In this case, the max row number of a single parquet file is 1024, we can see four files in the directory.
-
-```sh
-(.context) % ls datasets/mock_data/mock_stocks
-ea6c445914824cae8ef171bbafd3a58f.parquet
-604a63ccf14343c39bcc5bc0d1b3907d.parquet
-9c7150d9821c46c78054d87ae23d900f.parquet
-2ba1952316344b01a2a2f8e6faf41c31.parquet
-```
-
-**file**
-
-```sh
-delibird parquet write -e postgresql datasets/mock_data/mock_stocks_tmp.parquet postgresql://test:test123@localhost:5432/delibird mock_stocks;
-```
-
-Consider of reducing the memory usage and speed up the writing efficiency. write file can also support configuration of
-batch size.
-
-### workflow
-
-create and exectue a workflow using a yaml configuration file.
-
-```sh
-(.context) % delibird workflow  -h
-Usage: delibird workflow [OPTIONS] YAML_FILE
-
-  Execute yaml workflow.
-
-Options:
-  -h, --help  Show this message and exit.
-```
-
-Example:
-
-```yaml
-workflows:
-  - name: "read-workflow" # workflow name
-    direction: "table" # table or file or directory
-    table-name: "mock_stocks" # table name
-    engine: "postgresql"
-    dsn: "postgresql://test:test123@localhost:5432/delibird"
-    read-type: "file" # file or directory
-    filepath: "./datasets/mock_data/mock_stocks.parquet" # filepath
-
-  - name: "write-directory-workflow" # workflow name
-    direction: "directory"
-    table-name: "mock_stocks" # table name
-    engine: "postgresql"
-    dsn: "postgresql://test:test123@localhost:5432/delibird"
-    directory: "./datasets/mock_data/mock_stocks" # directory path
-    batch-size: 1024 # batch size
-
-  - name: "write-file-workflow" # workflow name
-    direction: "file"
-    table-name: "mock_stocks" # table name
-    engine: "postgresql"
-    dsn: "postgresql://test:test123@localhost:5432/delibird"
-    filepath: "./datasets/mock_data/mock_stocks_rewrite.parquet"
-```
-
-## TODO
-
-- remove 'code' type from delibird mock. add new supported types such as random string and random digit string.
-
-## Dependency
-
-pyarrow >=9.0.0
-
-python >= 3.10
-
-## License
-
-Apache License 2.0
+## 版权
+基于 [Apache-2.0](LICENSE) 版权，可以自由使用和修改。

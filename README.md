@@ -110,6 +110,38 @@ key.toml 就是配置文件，可以带路径。例如，/home/aaa/delibird/conf
 delibird stop
 ```
 
+### 调用接口
+通过 http 调用接口，下面是用 python 的一个例子
+
+```python
+from delibird.client import Chat
+import asyncio
+
+
+async def stream_fetch():
+    """Test client."""
+
+    messages = [
+        {"role": "user", "content": "Python 如何实现异步编程"},
+    ]
+
+    host = "localhost"
+    port = 8000
+    router = "spark"
+    url = f"http://{host}:{port}/{router}/chat/completion"
+
+    chat = Chat("v30")
+
+    async for result in chat.stream_fetch(messages, url):
+        print(result)
+
+
+def test_client():
+    asyncio.run(stream_fetch())
+```
+
+指定url、模型名称和版本号，然后调用接口即可。
+
 ## 监控页面
 
 

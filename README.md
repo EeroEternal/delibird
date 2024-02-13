@@ -95,12 +95,14 @@ url_suffix = "ernie_bot_8k"
 
 替换掉上面的 "XXX" 为对应的 api_key 或者其他配置信息。"qwen.max" 后面的 max 代表模型名称，前面的 "qwen" 代表模型服务路由
 
+- 配置文件可以参考 [config.toml](./examples/config.toml) 文件
+
 然后运行服务
 
 ```shell
-delibird start -c key.toml
+delibird start -c config.toml
 ```
-key.toml 就是配置文件，可以带路径。例如，/home/aaa/delibird/key.toml
+key.toml 就是配置文件，可以带路径。例如，/home/aaa/delibird/config.toml
 
 停止服务
 

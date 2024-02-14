@@ -90,6 +90,9 @@ class Gateway:
         # 获取 driver 对应的配置
         driver_config = self._driver_config(driver_name)
 
+        if not driver_config:
+            return f"{driver_name} 对应的配置不存在"
+
         result, message = router_object.read_config(driver_config)
         if not result:
             logger.echo(message, "error")

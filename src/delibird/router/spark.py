@@ -135,7 +135,6 @@ class Spark(Base):
     async def _process_data(self, data):
         # 如果 data 为空，直接返回空
         if not data:
-            print(f'return ""')
             yield ""
 
         logger = Log("delibird")

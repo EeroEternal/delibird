@@ -11,10 +11,10 @@ async def stream_fetch():
 
     host = "localhost"
     port = 8000
-    router = "ernie"
+    router = "minimax"
     url = f"http://{host}:{port}/{router}/chat/completion"
 
-    chat = Chat("ernie-bot-turbo")
+    chat = Chat("abab6-chat")
 
     async for result in chat.stream_fetch(messages, url):
         print(result)

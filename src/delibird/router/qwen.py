@@ -23,6 +23,7 @@ class Qwen(Base):
             chunk_size: 分块大小
         """
         self.model = model
+
         responses = dashscope.Generation.call(
             self.model,
             messages=messages,

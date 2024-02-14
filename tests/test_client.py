@@ -11,10 +11,10 @@ async def stream_fetch():
 
     host = "localhost"
     port = 8000
-    router = "spark"
+    router = "qwen"
     url = f"http://{host}:{port}/{router}/chat/completion"
 
-    chat = Chat("generalv3")
+    chat = Chat("qwen-plus")
 
     async for result in chat.stream_fetch(messages, url):
         print(result)

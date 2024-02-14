@@ -104,8 +104,8 @@ class Gateway:
         for item in self.__routers:
             if item.get("name") == router:
                 return item.get("driver")
-            else:
-                return None
+
+        return None
 
     def _driver_config(self, driver_name):
         """根据 driver_name 获取对应的配置."""

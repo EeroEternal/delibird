@@ -14,7 +14,7 @@ async def stream_fetch():
     router = "spark"
     url = f"http://{host}:{port}/{router}/chat/completion"
 
-    chat = Chat("v30")
+    chat = Chat("generalv3")
 
     async for result in chat.stream_fetch(messages, url):
         print(result)

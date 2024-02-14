@@ -18,12 +18,11 @@ class Ernie(Base):
         super().__init__()
         self.access_token = ""
 
-    def read_config(self, config, model):
+    def read_config(self, config):
         """读取配置文件.
 
         Args:
             config: 配置文件
-            model: 模型名称。格式为 v4、8k、bot、speed、turbo
         return:
             (bool, str): (True, "success") or (False, "error message")
         """

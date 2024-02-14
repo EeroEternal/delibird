@@ -13,7 +13,7 @@ from delibird.router import Gateway
 
 app = FastAPI()
 
-router = Gateway()
+gateway = Gateway()
 
 # Allow requests from any domain
 origins = ["*"]
@@ -33,7 +33,7 @@ def startup():
     """Startup."""
     global router
     config_file = os.getenv("CONFIG_FILE", "config.toml")
-    router.read_config(config_file)
+    gateway.read_config(config_file)
 
 
 @app.on_event("shutdown")
@@ -63,4 +63,6 @@ async def chat_completion(maas: str, request: dict):
     if not messages or not model:
         return "messages or model is None"
 
-    return router.send(maas, messages, model)
+    # 发送请求
+    global gateway
+    return gateway.send(maas, messages, model)

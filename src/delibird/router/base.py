@@ -91,7 +91,6 @@ class Base:
         """
         if not config:
             return (False, "config is None")
-
         # 读取 api_key
         if not config.get("api_key"):
             return (False, "api_key 不存在")

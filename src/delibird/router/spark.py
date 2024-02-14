@@ -97,12 +97,28 @@ class Spark(Base):
 
     async def send(
         self,
-        model,
         messages,
+        model,
         **kwargs,
     ):
         # 设置 model
         self.model = model
+
+        # 根据不同 model 设置 url
+        # https://www.xfyun.cn/doc/spark/Web.html#_1-%E6%8E%A5%E5%8F%A3%E8%AF%B4%E6%98%8E
+        # generalv3.5  wss://spark-api.xf-yun.com/v3.5/chat
+        # generalv3 wss://spark-api.xf-yun.com/v3.1/chat
+        # generalv2 wss://spark-api.xf-yun.com/v2.1/chat
+        # general wss://spark-api.xf-yun.com/v1.1/chat
+
+        if model == "generalv3.5":
+            self.url = "wss://spark-api.xf-yun.com/v3.5/chat"
+        elif model == "generalv3":
+            self.url = "wss://spark-api.xf-yun.com/v3.1/chat"
+        elif model == "generalv2":
+            self.url = "wss://spark-api.xf-yun.com/v2.1/chat"
+        elif model == "general":
+            self.url = "wss://spark-api.xf-yun.com/v1.1/chat"
 
         # 生成 url
         self.url = self._create_url()

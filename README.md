@@ -49,48 +49,45 @@ pip install delibird
 host = "localhost"
 port = 8000
 
-[spark]
-name = "spark"
+routers = [
+    { name = "spark", driver = "spark" },
+    { name = "qwen", driver = "qwen" },
+    { name = "ernie", driver = "ernie" },
+    { name = "minimax", driver = "minimax" },
+    { name = "openai_compatible", driver = "openai" },
+]
 
-[spark.v35]
-version = "generalv3.5"
+[driver]
+[driver.spark]
+# general 指向V1.5版本; generalv2 指向V2版本; generalv3 指向V3版本; generalv3.5 指向V3.5版本;
 app_id = "XXX"
 api_key = "XXX"
 api_secret = "XXX"
-url = "wss://spark-api.xf-yun.com/v3.5/chat"
+url = "wss://spark-api.xf-yun.com"
+models = ["general", "generalv2", "generalv3", "generalv3.5"]
 
-
-[spark.v30]
-version = "generalv3"
-app_id = "XXX"
+[driver.qwen]
 api_key = "XXX"
-api_secret = "XXX"
-url = "wss://spark-api.xf-yun.com/v3.1/chat"
+models = ["qwen-turbo", "qweb-plus", "qwen-max"]
 
-[qwen]
-name = "qwen"
 
-[qwen.max] # qwen-turbo, qwen-plus, qwen-max
-#http or websocket
-api_key = "XXX"
-
-[qwen.plus]
-api_key = "XXX"
-
-[ernie]
-appid = 123456678
+[driver.ernie]
+appid = 50396495
 api_key = "XXX"
 secret_key = "XXX"
-url_prefix = "XXX"
+url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat"
 access_token = "XXX"
-# curl 'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=[API Key]&client_secret=[Secret Key]'
-# 获取 access_token
+models = [ "ernie", "ernie-v4", "ernie-8k", "ernie-bot", "ernie-speed", "ernie-bot-turbo",
+]
 
-[ernie.v4]
-url_suffix = "completions_pro"
+[driver.minimax]
+api_key = "XXX"
+url = "https://api.minimax.chat/v1/text"
+models = ["chatcompletion", "chatcompletion_pro"]
 
-[ernie.8k]
-url_suffix = "ernie_bot_8k"
+[driver.openai]
+api_key = "xxx"
+models = ["gpt-3.5-turbo", "gpt-4"]
 ```
 
 替换掉上面的 "XXX" 为对应的 api_key 或者其他配置信息。"qwen.max" 后面的 max 代表模型名称，前面的 "qwen" 代表模型服务路由

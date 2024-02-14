@@ -9,6 +9,7 @@ class Base:
         self.url = ""
         self.api_key = ""
         self.model = ""
+        self.support_models = []
 
     async def send(self, messages, model, chunk_size=512, protocol="http"):
         """发送.
@@ -24,6 +25,10 @@ class Base:
 
         # 设置 model 名称，作为子类拼接 url 使用
         self.model = model
+
+        # 检查 model 对应的 models 是否存在，就是检查对应模型是否支持
+        if model not in self.support_models:
+            yield "不支持该模型"
 
         if protocol == "http":
             async for data in self._http_send(messages, chunk_size):
@@ -96,5 +101,10 @@ class Base:
         if not config.get("api_key"):
             return (False, "api_key 不存在")
         self.api_key = config.get("api_key")
+
+        # 读取 support models
+        self.support_models = config.get("support_models")
+        if not self.support_models:
+            return (False, "support_models 不存在")
 
         return (True, "success")

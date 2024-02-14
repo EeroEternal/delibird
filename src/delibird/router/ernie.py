@@ -6,10 +6,11 @@ from .base import Base
 from fastapi.responses import StreamingResponse
 
 url_map = {
-    "v4": "completions_pro",
-    "8k": "ernie_bot_8k",
-    "bot": "completions",
-    "speed": "ernie_speed",
+    "ernie-v4": "completions_pro",
+    "ernie-8k": "ernie_bot_8k",
+    "ernie-bot": "completions",
+    "ernie-speed": "ernie_speed",
+    "ernie-bot-turbo": "eb-instant",
 }
 
 

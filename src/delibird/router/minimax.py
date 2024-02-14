@@ -67,11 +67,21 @@ class Minimax(Base):
 
         # 调用父类的 send 方法
         async for data in super().send(messages, model, headers=headers, body=body):
-            yield _decode_messages(data)
+            if_finish, message = _decode_messages(data)
+
+            yield message
+
+            if if_finish:
+                break
 
 
 def _decode_messages(message):
-    """解析 Minimax 返回的 messages"""
+    """解析 Minimax 返回的 messages
+
+    Returns:
+        True,message: 是否是最后一条消息，消息内容
+        如果是 True，表示是最后一条消息
+    """
     # {
     #     "created": 1689738159,
     #     "model": "abab5.5-chat",
@@ -96,26 +106,29 @@ def _decode_messages(message):
     #  从 choices 中取出 messages 的 text
     # 检查 message 开头是否以 data:
     if not message.startswith("data:"):
-        return message
+        return (True, message)
 
     # 去掉开头的 data: 字符串
-    result = message[5:]
+    result = message[6:]
 
     # 转换为 json
     try:
         result = json.loads(result)
 
+        # 获取 choices 中的 messages 中的 text
+        result = result.get("choices")[0].get("messages")[0].get("text")
+
         # 如果 result 存在 "usage",说明流结束
         if "usage" in result:
-            # 返回空，表示结束
-            return ""
+            # 返回空，表示这个消息完成之后结束
+            return (True, result)
+        else:
+            return (False, result)
 
-        # 获取 choices 中的 messages 中的 text
-        return result.get("choices")[0].get("messages")[0].get("text")
     except json.JSONDecodeError as e:
         logger = Log("delibird")
         logger.echo(f"json 解析错误: {e}", "error")
-        return ""
+        return (True, "json 解析错误")
 
 
 def _build_messages(messages):

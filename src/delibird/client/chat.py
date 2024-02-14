@@ -28,7 +28,7 @@ class Chat:
                 headers={"Content-Type": "application/json"},
             ) as response:
                 if response.status == 200:
-                    async for chunk in response.content.iter_chunked(1024):
+                    async for chunk in response.content.iter_chunked(2048):
                         yield chunk.decode("utf-8")
                     else:
                         logger = Log("delibird")

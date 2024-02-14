@@ -15,7 +15,7 @@ class Base:
         self,
         messages,
         model,
-        chunk_size=512,
+        chunk_size=2048,
         protocol="http",
         headers=None,
         params=None,
@@ -51,7 +51,7 @@ class Base:
             async for data in self._websocket_send(messages):
                 yield data
 
-    async def _http_send(self, messages, headers=None, body=None, chunk_size=512):
+    async def _http_send(self, messages, headers=None, body=None, chunk_size=2048):
         """发送.
 
         Args:
@@ -71,7 +71,7 @@ class Base:
         # send request
         async with aiohttp.ClientSession() as session:
             async with session.post(self.url, headers=headers, json=body) as response:
-                async for chunk in response.content.iter_chunked(chunk_size):
+                async for chunk in response.content.iter_any():
                     if not chunk:
                         break
 

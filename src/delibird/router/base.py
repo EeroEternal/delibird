@@ -4,7 +4,22 @@ import aiohttp
 import websocket
 
 
-class Base:
+class Meta(type):
+    def __call__(cls, *args, **kwargs):
+        class_type = kwargs.pop("class_type", None)
+        if class_type is not None:
+            subclasses = {
+                subclass.__name__: subclass for subclass in cls.__subclasses__()
+            }
+            try:
+                return subclasses[class_type](*args, **kwargs)
+            except KeyError:
+                raise ValueError(f"Invalid class type: {class_type}")
+        else:
+            return super().__call__(*args, **kwargs)
+
+
+class Base(metaclass=Meta):
     def __init__(self):
         self.url = ""
         self.api_key = ""
@@ -66,17 +81,17 @@ class Base:
             headers = {}
 
         if not body:
-            body = {"messages": messages, "stream": True}
+            body = (
+                {"messages": messages, "stream": True}
+                if not self.model
+                else {"messages": messages, "model": self.model, "stream": True}
+            )
 
         # send request
         async with aiohttp.ClientSession() as session:
             async with session.post(self.url, headers=headers, json=body) as response:
-                async for chunk in response.content.iter_any():
-                    if not chunk:
-                        break
-
-                    data = chunk.decode("utf-8")
-                    yield data
+                async for chunk in response.content.iter_chunked(chunk_size):
+                    yield chunk
 
     async def _websocket_send(self, messages):
         """发送.

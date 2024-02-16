@@ -2,11 +2,7 @@
 import tomllib
 from delibird.log import Log
 from fastapi.responses import StreamingResponse
-from .qwen import Qwen
-from .openai import OpenAI
-from .spark import Spark
-from .minimax import Minimax
-from .ernie import Ernie
+from .base import Base
 import sys
 
 
@@ -70,19 +66,7 @@ class Gateway:
             return f"{router} 对应的 driver 不存在"
 
         # 根据 driver 获取对应的类
-        router_object = None
-        if driver_name == "spark":
-            router_object = Spark()
-        elif driver_name == "qwen":
-            router_object = Qwen()
-        elif driver_name == "minimax":
-            router_object = Minimax()
-        elif driver_name == "ernie":
-            router_object = Ernie()
-        elif driver_name == "openai" or driver_name == "openai_compatible":
-            router_object = OpenAI()
-        else:
-            return "没有对应的路由服务"
+        router_object = Base(class_type=driver_name)  # type: ignore
 
         if not router_object:
             return "实例化失败"

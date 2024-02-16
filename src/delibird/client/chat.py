@@ -29,7 +29,13 @@ class Chat:
             ) as response:
                 if response.status == 200:
                     async for chunk in response.content.iter_chunked(2048):
-                        yield chunk.decode("utf-8")
-                    else:
-                        logger = Log("delibird")
-                        logger.echo(f"Error: {response.status}", "error")
+                        data = chunk.decode("utf-8")
+
+                        # 检查 [DONE] 是否存在，如果存在，就说明已经接收完毕
+                        if data == "[DONE]"
+                            break
+
+                        yield data
+                else:
+                    logger = Log("delibird")
+                    logger.echo(f"Error: {response.status}", "error")

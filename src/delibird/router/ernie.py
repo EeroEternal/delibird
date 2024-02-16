@@ -1,4 +1,5 @@
 """百度文心."""
+from re import S
 from delibird.log import Log
 import aiohttp
 import json
@@ -64,7 +65,7 @@ class Ernie(Base):
         # 为 url 添加 access_token，这个是父类实例的 url
         self.url = self.url + "?access_token=" + self.access_token
 
-    async def send(self, messages, model, chunk_size=512):
+    async def send(self, messages, model, chunk_size=2048):
         """发送.
 
         Args:
@@ -84,6 +85,15 @@ class Ernie(Base):
             # 将 json 字符串转换为字典
             try:
                 data = json.loads(data)
+
+                # 获取 data 中 is_end 字段
+                is_end = data.get("is_end")
+                if not is_end:
+                    continue
+
+                # 结尾标记
+                if is_end is True:
+                    yield "[DONE]"
 
                 # 获取 data 中 result 字段返回
                 result = data.get("result")

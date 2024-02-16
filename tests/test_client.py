@@ -11,7 +11,7 @@ async def stream_fetch():
 
     host = "localhost"
     port = 8000
-    router = "spark"
+    router = "ernie"
     url = f"http://{host}:{port}/{router}/chat/completion"
 
     chat = Chat("ernie-speed")

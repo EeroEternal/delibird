@@ -84,12 +84,16 @@ class Ernie(Base):
 
             # 将 json 字符串转换为字典
             try:
-                data = json.loads(data)
+                try:
+                    data = json.loads(data)
+                except json.JSONDecodeError as e:
+                    logger = Log("delibird")
+                    logger.echo(f"json 解析错误: {e}", "error")
+                    yield ""
+                    continue
 
                 # 获取 data 中 is_end 字段
                 is_end = data.get("is_end")
-                if not is_end:
-                    continue
 
                 # 结尾标记
                 if is_end is True:

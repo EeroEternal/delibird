@@ -3,6 +3,11 @@ import tomllib
 from delibird.log import Log
 from fastapi.responses import StreamingResponse
 from .base import Base
+from .ernie import Ernie
+from .qwen import Qwen
+from .minimax import Minimax
+from .spark import Spark
+
 import sys
 
 
@@ -66,7 +71,8 @@ class Gateway:
             return f"{router} 对应的 driver 不存在"
 
         # 根据 driver 获取对应的类
-        router_object = Base(class_type=driver_name)  # type: ignore
+        class_name = driver_name.capitalize()
+        router_object = Base(class_type=class_name)  # type: ignore
 
         if not router_object:
             return "实例化失败"

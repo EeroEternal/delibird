@@ -32,7 +32,7 @@ class Chat:
                         data = chunk.decode("utf-8")
 
                         # 检查 [DONE] 是否存在，如果存在，就说明已经接收完毕
-                        if data == "[DONE]"
+                        if data == "[DONE]":
                             break
 
                         yield data

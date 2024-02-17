@@ -38,3 +38,15 @@ class ChatGLM(Base):
 
         # 拼接 header，增加 Authorization
         headers = {"Authorization": "Bearer " + generate_token(self.api_key, 3600)}
+
+        # 调用父类的 send 方法
+        async for data in super().send(messages, model, headers=headers):
+            # 判断是否已经到结尾
+            if data == "[DONE]":
+                yield data
+
+            # 去掉开头的 data: 字符串
+            data = data[5:]
+
+            # 去掉末尾的换行符
+            data = data.rstrip()

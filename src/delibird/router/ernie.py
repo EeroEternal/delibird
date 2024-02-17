@@ -80,32 +80,26 @@ class Ernie(Base):
             # 去掉开头的 data: 字符串
             data = data[5:]
             # 去掉结尾的 /n/n 字符串
-            data = data[:-2]
+            data = data.rstrip()
 
             # 将 json 字符串转换为字典
             try:
-                try:
-                    data = json.loads(data)
-                except json.JSONDecodeError as e:
-                    logger = Log("delibird")
-                    logger.echo(f"json 解析错误: {e}", "error")
-                    yield ""
-                    continue
-
-                # 获取 data 中 is_end 字段
-                is_end = data.get("is_end")
-
-                # 结尾标记
-                if is_end is True:
-                    yield "[DONE]"
-
-                # 获取 data 中 result 字段返回
-                result = data.get("result")
-
-                # 返回 result 字段
-                yield result
-
+                data = json.loads(data)
             except json.JSONDecodeError as e:
                 logger = Log("delibird")
                 logger.echo(f"json 解析错误: {e}", "error")
                 yield ""
+                continue
+
+            # 获取 data 中 is_end 字段
+            is_end = data.get("is_end")
+
+            # 结尾标记
+            if is_end is True:
+                yield "[DONE]"
+
+            # 获取 data 中 result 字段返回
+            result = data.get("result")
+
+            # 返回 result 字段
+            yield result

@@ -5,6 +5,7 @@ import aiohttp
 import json
 from .base import Base
 from fastapi.responses import StreamingResponse
+from .common import decode_data
 
 url_map = {
     "ernie-v4": "completions_pro",
@@ -74,31 +75,31 @@ class Ernie(Base):
         # 创建 url
         self._create_url(model)
 
-        # 消费父类的 send 方法
-        async for data in super().send(messages, model):
-            # 去掉开头的 data: 字符串
-            data = data[5:]
-            # 去掉结尾的 /n/n 字符串
-            data = data.rstrip()
+        # 调用父类的 send 方法
+        async for data in super().send(messages, model, filter_func=_decode_data):
+            yield data
 
-            # 将 json 字符串转换为字典
-            try:
-                data = json.loads(data)
-            except json.JSONDecodeError as e:
-                logger = Log("delibird")
-                logger.echo(f"json 解析错误: {e}", "error")
-                yield ""
-                continue
 
-            # 获取 data 中 is_end 字段
-            is_end = data.get("is_end")
+def _decode_data(data):
+    """解析数据."""
 
-            # 结尾标记
-            if is_end is True:
-                yield "[DONE]"
+    result, data = decode_data(data)
 
-            # 获取 data 中 result 字段返回
-            result = data.get("result")
+    if not result:
+        return (False, data)
 
-            # 返回 result 字段
-            yield result
+    # 获取 data 中 is_end 字段
+    is_end = data.get("is_end")
+
+    # 获取 data 中 result 字段返回
+    data = data.get("result")
+
+    if not data:
+        return (False, "data 不存在")
+
+    # 结尾标记
+    if is_end is True:
+        # 最后一条数据，在末尾添加 [DONE] 标记
+        data = data + "[DONE]"
+
+    return (True, data)

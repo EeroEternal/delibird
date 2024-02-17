@@ -105,58 +105,72 @@ class Base(metaclass=Meta):
                 else {"messages": messages, "model": self.model, "stream": True}
             )
 
-        # send request
-        async with aiohttp.ClientSession() as session:
-            async with session.post(self.url, headers=headers, json=body) as response:
-                # 有些服务返回的时候是一次多个或者随便的，需要自己处理
-                buffer = ""
-                async for chunk in response.content.iter_any():
-                    # 解码
-                    chunk = chunk.decode("utf-8")
+        session = aiohttp.ClientSession()
+        response = await session.post(self.url, headers=headers, json=body)
+        buffer = ""  # 有些服务返回的时候是一次多个或者碎片，需要自己处理
 
-                    # 获取数据，和 buffer 拼接
-                    buffer += chunk
+        # 迭代返回的数据
+        async for chunk in response.content.iter_any():
+            # 解码
+            try:
+                chunk = chunk.decode("utf-8")
+            except UnicodeDecodeError:
+                print(f"解码错误: {chunk}")
+                continue
 
-                    # 这一批次处理的结果输出
-                    output = ""
+            # 获取数据，和 buffer 拼接
+            buffer += chunk
 
-                    # 解析数据，返回内容
-                    while split_tag in buffer:
-                        # 从字符串开头，获取到第一个分割标志的位置
-                        try:
-                            first_index = buffer.index(split_tag)
-                        except ValueError:
-                            # 没有找到分割标志，跳出
-                            break
+            # 这一批次处理的结果输出
+            output = ""
 
-                        # 获取到分割标志之前的数据
-                        head_str = buffer[:first_index]
+            # 解析数据，返回内容
+            while split_tag in buffer:
+                # 从字符串开头，获取到第一个分割标志的位置
+                try:
+                    first_index = buffer.index(split_tag)
+                except ValueError:
+                    # 没有找到分割标志，跳出
+                    break
 
-                        # 如果有处理函数，就调用处理函数。返回处理后的数据
-                        # 如果没有处理函数，就直接返回数据
-                        # result 是处理是否成功，snippet_data 是处理后的数据
-                        if filter_func:
-                            result, snippet_data = filter_func(head_str)
+                # 获取到分割标志之前的数据
+                head_str = buffer[:first_index]
 
-                            # 数据处理没有成功，跳出
-                            if not result:
-                                break
-                        else:
-                            result = True
-                            snippet_data = head_str
+                # 如果有处理函数，就调用处理函数。返回处理后的数据
+                # 如果没有处理函数，就直接返回数据
+                # result 是处理是否成功，snippet_data 是处理后的数据
+                if filter_func:
+                    result, snippet_data = filter_func(head_str)
 
-                        # 如果数据是结束标记，跳出
-                        if snippet_data == end_tag:
-                            break
+                    # 数据处理没有成功，跳出
+                    if not result:
+                        break
+                else:
+                    result = True
+                    snippet_data = head_str
 
-                        # 拼接返回的数据
-                        output += snippet_data
+                # 如果数据是结束标记，跳出
+                if snippet_data == end_tag:
+                    break
 
-                        # 剩下的数据,跳过分割标志，再放到 buffer里面
-                        buffer = buffer[buffer.index(split_tag) + len(split_tag) :]
+                # 如果数据末尾包含结束标记
+                # 去掉结尾标记，获取数据，跳出
+                if snippet_data.endswith(end_tag):
+                    snippet_data = snippet_data[: -len(end_tag)]
+                    output += snippet_data
+                    break
 
-                    # 返回这一批次处理的结果
-                    yield output
+                # 拼接返回的数据
+                output += snippet_data
+
+                # 剩下的数据,跳过分割标志，再放到 buffer里面
+                buffer = buffer[buffer.index(split_tag) + len(split_tag) :]
+
+            # 返回这一批次处理的结果
+            yield output
+
+        # 关闭 session
+        await session.close()
 
     async def _websocket_send(self, messages):
         """发送.

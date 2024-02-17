@@ -25,7 +25,7 @@ async def stream_fetch():
     ]
 
     # test index
-    index = 1
+    index = 2
 
     host = "localhost"
     port = 8000

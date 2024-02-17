@@ -80,8 +80,6 @@ class Chatglm(Base):
                 # 剩下的数据, +2 是去掉 "\n\n"
                 buffer = buffer[buffer.index("\n\n") + 2 :]
 
-            print(f"return_data: {return_data}")
-
             yield return_data
 
 
@@ -99,7 +97,6 @@ def _decode_data(data):
     data = data.strip()
 
     # 检查是否是 '[DONE]'
-    print(f"if done: {len(data)}")
     if data == "[DONE]":
         print("return done")
         return (True, data)

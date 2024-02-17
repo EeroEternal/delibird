@@ -7,6 +7,10 @@ test_map = [
         "model": "glm-3-turbo",
     },
     {
+        "name": "chatglm",
+        "model": "glm-4",
+    },
+    {
         "name": "ernie",
         "model": "ernie-bot-turbo",
     },
@@ -21,7 +25,7 @@ async def stream_fetch():
     ]
 
     # test index
-    index = 0
+    index = 1
 
     host = "localhost"
     port = 8000

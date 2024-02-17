@@ -40,8 +40,6 @@ class Chatglm(Base):
 
         self.model = model
 
-        print(f"chatglm send messages: {messages}, model: {model}")
-
         # 拼接 header，增加 Authorization
         headers = {"Authorization": "Bearer " + generate_token(self.api_key, 3600)}
 
@@ -49,38 +47,10 @@ class Chatglm(Base):
         buffer = ""
 
         # 调用父类的 send 方法
-        async for data in super().send(messages, model, headers=headers):
-            # result 是最后输出的结果，可能是多个数据拼接的
-            output = ""
-
-            # decode data
-            data = data.decode("utf-8")
-
-            # 获取数据，和 buffer 拼接
-            buffer += data
-
-            # 获取数据到 "\n\n" 为止
-            return_data = ""  # 可以返回的数据
-            while "\n\n" in buffer:
-                # 从字符串开头，获取到 "\n\n" 为止的数据
-                head_str = buffer[: buffer.index("\n\n")]
-
-                # 解析数据，返回内容. snippet_data 理解为一段可以返回的数据
-                result, snippet_data = _decode_data(head_str)
-
-                if not result:
-                    break
-
-                if snippet_data == "[DONE]":
-                    break
-
-                # 拼接返回的数据
-                return_data += snippet_data
-
-                # 剩下的数据, +2 是去掉 "\n\n"
-                buffer = buffer[buffer.index("\n\n") + 2 :]
-
-            yield return_data
+        async for data in super().send(
+            messages, model, headers=headers, filter_func=_decode_data
+        ):
+            yield data
 
 
 def _decode_data(data):
@@ -98,7 +68,6 @@ def _decode_data(data):
 
     # 检查是否是 '[DONE]'
     if data == "[DONE]":
-        print("return done")
         return (True, data)
 
     # 将 json 字符串转换为字典

@@ -34,6 +34,9 @@ class Base(metaclass=Meta):
         headers=None,
         params=None,
         body=None,
+        filter_func=None,
+        split_tag="\n\n",
+        done_tag="[DONE]",
     ):
         """发送.
 
@@ -45,6 +48,9 @@ class Base(metaclass=Meta):
             header: 如何存在，就按照这个 header 发送请求
             params: 如何存在，就按照这个 params 发送请求
             body: 如何存在，就按照这个 body 发送请求
+            filter_func: 过滤数据的函数
+            split_tag: 分割数据的标志
+            done_tag: 完成的标志
         """
         if not self.url:
             raise ValueError("url 不能为空")
@@ -57,19 +63,34 @@ class Base(metaclass=Meta):
             raise ValueError(f"不支持该模型: {model}")
 
         if protocol == "http":
-            async for data in self._http_send(messages, headers, body):
+            async for data in self._http_send(
+                messages, headers, body, filter_func, split_tag, done_tag
+            ):
                 yield data
 
         if protocol == "websocket":
             async for data in self._websocket_send(messages):
                 yield data
 
-    async def _http_send(self, messages, headers=None, body=None):
+    async def _http_send(
+        self,
+        messages,
+        headers=None,
+        body=None,
+        filter_func=None,
+        split_tag="\n\n",
+        end_tag="[DONE]",
+    ):
         """发送.
 
         Args:
             messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
             model: 对应的模型名称。格式为例如 qwen 就是 qwen-max、qwen-min、qwen-speed、qwen-turbo
+            headers: 请求头
+            body: 请求体
+            filter_func: 过滤数据的函数
+            split_tag: 分割数据的标志
+            end_tag: 完成的标志
         """
         if not self.url:
             raise ValueError("url 不能为空")
@@ -87,8 +108,55 @@ class Base(metaclass=Meta):
         # send request
         async with aiohttp.ClientSession() as session:
             async with session.post(self.url, headers=headers, json=body) as response:
+                # 有些服务返回的时候是一次多个或者随便的，需要自己处理
+                buffer = ""
                 async for chunk in response.content.iter_any():
-                    yield chunk
+                    # 解码
+                    chunk = chunk.decode("utf-8")
+
+                    # 获取数据，和 buffer 拼接
+                    buffer += chunk
+
+                    # 这一批次处理的结果输出
+                    output = ""
+
+                    # 解析数据，返回内容
+                    while split_tag in buffer:
+                        # 从字符串开头，获取到第一个分割标志的位置
+                        try:
+                            first_index = buffer.index(split_tag)
+                        except ValueError:
+                            # 没有找到分割标志，跳出
+                            break
+
+                        # 获取到分割标志之前的数据
+                        head_str = buffer[:first_index]
+
+                        # 如果有处理函数，就调用处理函数。返回处理后的数据
+                        # 如果没有处理函数，就直接返回数据
+                        # result 是处理是否成功，snippet_data 是处理后的数据
+                        if filter_func:
+                            result, snippet_data = filter_func(head_str)
+
+                            # 数据处理没有成功，跳出
+                            if not result:
+                                break
+                        else:
+                            result = True
+                            snippet_data = head_str
+
+                        # 如果数据是结束标记，跳出
+                        if snippet_data == end_tag:
+                            break
+
+                        # 拼接返回的数据
+                        output += snippet_data
+
+                        # 剩下的数据,跳过分割标志，再放到 buffer里面
+                        buffer = buffer[buffer.index(split_tag) + len(split_tag) :]
+
+                    # 返回这一批次处理的结果
+                    yield output
 
     async def _websocket_send(self, messages):
         """发送.

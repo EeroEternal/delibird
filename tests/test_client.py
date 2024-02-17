@@ -14,6 +14,7 @@ test_map = [
         "name": "ernie",
         "model": "ernie-bot-turbo",
     },
+    {"name": "minimax", "model": "abab5.5-chat"},
 ]
 
 
@@ -25,7 +26,7 @@ async def stream_fetch():
     ]
 
     # test index
-    index = 2
+    index = 0
 
     host = "localhost"
     port = 8000

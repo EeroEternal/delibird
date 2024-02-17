@@ -3,6 +3,7 @@
 from .base import Base
 import json
 from delibird.log import Log
+from .common import decode_data
 
 
 class Minimax(Base):
@@ -65,69 +66,38 @@ class Minimax(Base):
         }
 
         # 调用父类的 send 方法
-        async for data in super().send(messages, model, headers=headers, body=body):
-            if_finish, message = _decode_data(data)
-
-            yield message
-
-            if if_finish:
-                break
+        async for data in super().send(
+            messages, model, headers=headers, body=body, filter_func=_decode_data
+        ):
+            yield data
 
 
-def _decode_data(message):
-    """解析 Minimax 返回的 messages
+def _decode_data(data):
+    """解析 Minimax 返回的 messages."""
 
-    Returns:
-        True,message: 是否是最后一条消息，消息内容
-        如果是 True，表示是最后一条消息
-    """
-    # {
-    #     "created": 1689738159,
-    #     "model": "abab5.5-chat",
-    #     "reply": "Who am I?",
-    #     "choices": [
-    #         {
-    #             "finish_reason": "stop",
-    #             "messages": [
-    #                 {"sender_type": "BOT",
-    #                  "sender_name": "MM智能助理",
-    #                  "text": "Who am I?"}
-    #             ],
-    #         }
-    #     ],
-    #     "usage": {"total_tokens": 191},
-    #     "input_sensitive": false,
-    #     "output_sensitive": false,
-    #     "id": "01068eae26a39a3a39b7bb56cfbe4266",
-    #     "base_resp": {"status_code": 0, "status_msg": ""},
-    # },
-    #
-    #  从 choices 中取出 messages 的 text
-    # 检查 message 开头是否以 data:
-    if not message.startswith("data:"):
-        return (True, message)
+    # 解析 data
+    result, data = decode_data(data, start="data: ")
 
-    # 去掉开头的 data: 字符串
-    result = message[6:]
+    if not result:
+        return (False, data)
 
-    # 转换为 json
+    if not data:
+        return (False, "")
+
+    return_data = ""
+
+    # 检查 data 是否存在 choices
     try:
-        result = json.loads(result)
+        return_data = data["choices"][0]["messages"][0].get("text")
 
-        # 获取 choices 中的 messages 中的 text
-        result = result.get("choices")[0].get("messages")[0].get("text")
+        # 检查 data 是否存在 usage，如果存在，说明流结束
+        if "usage" in data:
+            # 在 usage 获取 text，在后面增加 [DONE]
+            return_data = return_data + "[DONE]"
 
-        # 如果 result 存在 "usage",说明流结束
-        if "usage" in result:
-            # 返回空，表示这个消息完成之后结束
-            return (True, result)
-        else:
-            return (False, result)
-
-    except json.JSONDecodeError as e:
-        logger = Log("delibird")
-        logger.echo(f"json 解析错误: {e}", "error")
-        return (True, "json 解析错误")
+        return (True, return_data)
+    except KeyError as e:
+        return (False, "数据格式错误")
 
 
 def _build_messages(messages):

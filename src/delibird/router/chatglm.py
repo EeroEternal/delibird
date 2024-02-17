@@ -62,10 +62,7 @@ def _decode_data(data):
     if not result:
         return (False, data)
 
-    # 检查是否存在 choices 和 delta
-    if "choices" in data and "delta" in data["choices"][0]:
-        # {"id":"8313807536837492492","created":1706092316,"model":"glm-4","choices":[{"index":0,"delta":{"role":"assistant","content":"土"}}]}
-        # data 格式类似上面的 json 结构，获取里面的 content
+    try:
         return (True, data["choices"][0]["delta"]["content"])
-    else:
+    except KeyError as e:
         return (False, "数据格式错误")

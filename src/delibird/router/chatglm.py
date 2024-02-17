@@ -4,6 +4,7 @@ import time
 import jwt
 import json
 from delibird.log import Log
+from .common import decode_data
 
 
 def generate_token(apikey: str, exp_seconds: int):
@@ -56,25 +57,10 @@ class Chatglm(Base):
 def _decode_data(data):
     """解析数据."""
 
-    # 检查开头是否是 data: 字符串
-    if not data.startswith("data:"):
-        return (False, "字符串开头不是 data: ")
+    result, data = decode_data(data)
 
-    # 去掉开头的 data: 字符串
-    data = data[5:]
-
-    # 去掉末尾的 \n\n 字符串
-    data = data.strip()
-
-    # 检查是否是 '[DONE]'
-    if data == "[DONE]":
-        return (True, data)
-
-    # 将 json 字符串转换为字典
-    try:
-        data = json.loads(data)
-    except json.JSONDecodeError as e:
-        return (False, f"json 解析错误{e}")
+    if not result:
+        return (False, data)
 
     # 检查是否存在 choices 和 delta
     if "choices" in data and "delta" in data["choices"][0]:

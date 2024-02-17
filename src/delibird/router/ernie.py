@@ -65,18 +65,17 @@ class Ernie(Base):
         # 为 url 添加 access_token，这个是父类实例的 url
         self.url = self.url + "?access_token=" + self.access_token
 
-    async def send(self, messages, model, chunk_size=2048):
+    async def send(self, messages, model):
         """发送.
 
         Args:
             messages: 发送的消息。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
-            chunk_size: 流式读取分块的大小。百度返回的是一个 json 结构
         """
         # 创建 url
         self._create_url(model)
 
         # 消费父类的 send 方法
-        async for data in super().send(messages, chunk_size):
+        async for data in super().send(messages, model):
             # 去掉开头的 data: 字符串
             data = data[5:]
             # 去掉结尾的 /n/n 字符串

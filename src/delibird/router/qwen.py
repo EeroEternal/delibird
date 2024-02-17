@@ -15,12 +15,11 @@ class Qwen(Base):
         """初始化."""
         super().__init__()
 
-    async def send(self, messages, model, chunk_size=512):
+    async def send(self, messages, model):
         """发送.
 
         Args:
             messages: 发送的消息
-            chunk_size: 分块大小
         """
         self.model = model
 

@@ -7,6 +7,7 @@ from .ernie import Ernie
 from .qwen import Qwen
 from .minimax import Minimax
 from .spark import Spark
+from .chatglm import Chatglm
 
 import sys
 
@@ -68,7 +69,7 @@ class Gateway:
         # 根据 router 从 self.__routers 中获取对应的 driver
         driver_name = self._driver_name(router)
         if not driver_name:
-            return f"{router} 对应的 driver 不存在"
+            return f"{router} 或者 {router} 对应的 driver 不存在"
 
         # 根据 driver 获取对应的类
         class_name = driver_name.capitalize()

@@ -30,7 +30,6 @@ class Base(metaclass=Meta):
         self,
         messages,
         model,
-        chunk_size=2048,
         protocol="http",
         headers=None,
         params=None,
@@ -41,7 +40,6 @@ class Base(metaclass=Meta):
         Args:
             messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
             model: 对应的模型名称。格式为例如 qwen 就是 qwen-max、qwen-min、qwen-speed、qwen-turbo
-            chunk_size: 流式读取分块的大小。百度返回的是一个 json 结构
             protocol: 请求协议 http 或者 websocket
 
             header: 如何存在，就按照这个 header 发送请求
@@ -56,23 +54,22 @@ class Base(metaclass=Meta):
 
         # 检查 model 对应的 models 是否存在，就是检查对应模型是否支持
         if model not in self.support_models:
-            yield "不支持该模型"
+            raise ValueError(f"不支持该模型: {model}")
 
         if protocol == "http":
-            async for data in self._http_send(messages, headers, body, chunk_size):
+            async for data in self._http_send(messages, headers, body):
                 yield data
 
         if protocol == "websocket":
             async for data in self._websocket_send(messages):
                 yield data
 
-    async def _http_send(self, messages, headers=None, body=None, chunk_size=2048):
+    async def _http_send(self, messages, headers=None, body=None):
         """发送.
 
         Args:
             messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
             model: 对应的模型名称。格式为例如 qwen 就是 qwen-max、qwen-min、qwen-speed、qwen-turbo
-            chunk_size: 流式读取分块的大小。百度返回的是一个 json 结构
         """
         if not self.url:
             raise ValueError("url 不能为空")
@@ -90,7 +87,7 @@ class Base(metaclass=Meta):
         # send request
         async with aiohttp.ClientSession() as session:
             async with session.post(self.url, headers=headers, json=body) as response:
-                async for chunk in response.content.iter_chunked(chunk_size):
+                async for chunk in response.content.iter_any():
                     yield chunk
 
     async def _websocket_send(self, messages):
@@ -118,7 +115,11 @@ class Base(metaclass=Meta):
                 ws_handler.close()
                 break
 
-            yield data
+            # 返回 bytes 类型数据
+            if isinstance(data, str):
+                yield data.encode("utf-8")
+            else:
+                yield data
 
     def read_config(self, config):
         """读取配置.

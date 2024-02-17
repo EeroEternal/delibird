@@ -21,6 +21,11 @@ Delibird 是一个多合一大模型接口网关。主要针对国内的大模�
 - [通义千问](https://dashscope.console.aliyun.com/model)
 - [文心大模型](https://cloud.baidu.com/product/wenxinworkshop)
 - [星火大模型](https://xinghuo.xfyun.cn/sparkapi)
+- [Minimax](https://api.minimax.chat/)
+- [ChatGLM](https://open.bigmodel.cn/dev/api)
+
+## 未来计划
+- [ ] function calling 支持
 
 ## 使用教程
 

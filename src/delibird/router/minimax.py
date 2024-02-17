@@ -36,7 +36,6 @@ class Minimax(Base):
         Args:
             messages: 请求参数。格式为 [ {"role": "user", "content": "Python 如何实现异步编程"}]
             model: 对应的模型名称。格式为例如 qwen 就是 qwen-max、qwen-min、qwen-speed、qwen-turbo
-            chunk_size: 流式读取分块的大小。百度返回的是一个 json 结构
             protocol: 请求协议 http 或者 websocket
         """
         if not self.url:
@@ -67,7 +66,7 @@ class Minimax(Base):
 
         # 调用父类的 send 方法
         async for data in super().send(messages, model, headers=headers, body=body):
-            if_finish, message = _decode_messages(data)
+            if_finish, message = _decode_data(data)
 
             yield message
 
@@ -75,7 +74,7 @@ class Minimax(Base):
                 break
 
 
-def _decode_messages(message):
+def _decode_data(message):
     """解析 Minimax 返回的 messages
 
     Returns:

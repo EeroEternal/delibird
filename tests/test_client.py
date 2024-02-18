@@ -15,6 +15,7 @@ test_map = [
         "model": "ernie-bot-turbo",
     },
     {"name": "minimax", "model": "abab5.5-chat"},
+    {"name": "baichuan", "model": "Baichuan2-Turbo"},
 ]
 
 

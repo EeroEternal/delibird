@@ -157,6 +157,12 @@ class Base(metaclass=Meta):
                 # 去掉结尾标记，获取数据，跳出
                 if snippet_data.endswith(end_tag):
                     snippet_data = snippet_data[: -len(end_tag)]
+
+                    # 循环检查一遍末尾是否有结束标记,有就去掉
+                    # 为了避免有些服务返回结束标记，然后在最后一条也有 finish_reason
+                    while snippet_data.endswith(end_tag):
+                        snippet_data = snippet_data[: -len(end_tag)]
+
                     output += snippet_data
                     break
 

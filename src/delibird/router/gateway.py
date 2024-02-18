@@ -8,6 +8,7 @@ from .qwen import Qwen
 from .minimax import Minimax
 from .spark import Spark
 from .chatglm import Chatglm
+from .baichuan import Baichuan
 
 import sys
 
@@ -109,7 +110,7 @@ class Gateway:
     def _check_drivers(self):
         """检查读取的规则是否正确.
 
-        routers 对应的 drives 是否存在.
+        routers 对应的 drivers 是否存在.
         """
 
         for router in self.__routers:

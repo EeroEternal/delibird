@@ -26,6 +26,7 @@ Delibird 是一个多合一大模型接口网关。主要针对国内的大模�
 - [百川](https://www.baichuan-ai.com/home)
 
 ## 未来计划
+- [ ] 开发管理页面
 - [ ] function calling 支持
 
 ## 使用教程

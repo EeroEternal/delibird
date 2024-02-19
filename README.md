@@ -1,6 +1,6 @@
 <div align="center">
   <picture>
-    <img alt="Delibird" src="images/describe.png" width=20%>
+    <img alt="Delibird" src="images/describe.png" width=10%>
   </picture>
 </div>
 

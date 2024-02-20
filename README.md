@@ -56,16 +56,19 @@ pip install delibird
 host = "localhost"
 port = 8000
 
+# name 是 router 的名称，对应的配置在 "config.name" 下面。driver 是对应的驱动名称。
+# base 是默认的驱动,兼容 openai
 routers = [
     { name = "spark", driver = "spark" },
     { name = "qwen", driver = "qwen" },
     { name = "ernie", driver = "ernie" },
     { name = "minimax", driver = "minimax" },
-    { name = "openai_compatible", driver = "openai" },
-]
+    { name = "chatglm", driver = "chatglm" },
+    { name = "baichuan", driver = "base" },
+    { name = "moonshot", driver = "base" }
 
-[driver]
-[driver.spark]
+[config]
+[config.spark]
 # general 指向V1.5版本; generalv2 指向V2版本; generalv3 指向V3版本; generalv3.5 指向V3.5版本;
 app_id = "XXX"
 api_key = "XXX"
@@ -73,12 +76,12 @@ api_secret = "XXX"
 url = "wss://spark-api.xf-yun.com"
 models = ["general", "generalv2", "generalv3", "generalv3.5"]
 
-[driver.qwen]
+[config.qwen]
 api_key = "XXX"
 models = ["qwen-turbo", "qwen-plus", "qwen-max"]
 
 
-[driver.ernie]
+[config.ernie]
 appid = 50396495
 api_key = "XXX"
 secret_key = "XXX"
@@ -87,12 +90,12 @@ access_token = "XXX"
 models = [ "ernie", "ernie-v4", "ernie-8k", "ernie-bot", "ernie-speed", "ernie-bot-turbo",
 ]
 
-[driver.minimax]
+[config.minimax]
 api_key = "XXX"
 url = "https://api.minimax.chat/v1/text"
 models = ["chatcompletion", "chatcompletion_pro"]
 
-[driver.openai]
+[config.openai]
 api_key = "xxx"
 models = ["gpt-3.5-turbo", "gpt-4"]
 ```

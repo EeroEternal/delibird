@@ -21,7 +21,7 @@ models = ["general", "generalv2", "generalv3", "generalv3.5"]
 
 [driver.qwen]
 api_key = "XXX"
-models = ["qwen-turbo", "qweb-plus", "qwen-max"]
+models = ["qwen-turbo", "qwen-plus", "qwen-max"]
 
 
 [driver.ernie]

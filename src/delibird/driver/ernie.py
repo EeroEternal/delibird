@@ -82,10 +82,20 @@ class Ernie(Base):
 def _decode_data(data):
     """解析数据."""
 
-    result, data = decode_data(data)
+    if not data.startswith("data:"):
+        return (False, "data 不是以 data: 开头")
 
-    if not result:
-        return (False, data)
+    # 去掉 data: 前缀和末尾的 \n\n
+    data = data[5:]
+    data = data.strip()
+
+    if data == "[DONE]":
+        return (True, data)
+
+    try:
+        data = json.loads(data)
+    except json.JSONDecodeError as e:
+        return (False, f"json 解析失败: {e}")
 
     # 获取 data 中 is_end 字段
     is_end = data.get("is_end")

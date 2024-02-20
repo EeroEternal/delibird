@@ -41,12 +41,6 @@ class Minimax(Base):
         if not self.url:
             raise ValueError("url 不能为空")
 
-        # 拼接 header，增加 Authorization
-        headers = {
-            "Authorization": "Bearer " + self.api_key,
-            "Content-Type": "application/json",
-        }
-
         # 给 url 增加 group_id
         self.url = self.url + "?GroupId=" + self.group_id
 
@@ -66,7 +60,7 @@ class Minimax(Base):
 
         # 调用父类的 send 方法
         async for data in super().send(
-            messages, model, headers=headers, body=body, filter_func=_decode_data
+            messages, model, body=body, filter_func=_decode_data
         ):
             yield data
 

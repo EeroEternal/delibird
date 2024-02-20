@@ -3,7 +3,7 @@ from .base import Base
 import time
 import jwt
 import json
-from delibird.util import Log, common_decode, decode_data
+from delibird.util import Log, common_decode
 
 
 def generate_token(apikey: str, exp_seconds: int):

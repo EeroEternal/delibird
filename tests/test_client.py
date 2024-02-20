@@ -1,5 +1,6 @@
 from delibird.client import Chat
 import asyncio
+import random
 
 test_map = [
     {
@@ -17,19 +18,26 @@ test_map = [
     {"name": "minimax", "model": "abab5.5-chat"},
     {"name": "baichuan", "model": "Baichuan2-Turbo"},
     {"name": "moonshot", "model": "moonshot-v1-8k"},
+    {"name": "qwen", "model": "qwen-turbo"},
+    {"name": "spark", "model": "generalv3"},
 ]
+
+
+questions = ["Python 如何构建一个类", "Rust 语言的特点", "Python 异步是如何实现的", "Python 如何处理字符串"]
 
 
 async def stream_fetch():
     """Test client."""
 
+    # 生成一个0到4随机数
+    index = random.randint(0, len(questions) - 1)
+
     messages = [
-        {"role": "user", "content": "Python 如何构建类"},
+        {"role": "user", "content": questions[index]},
     ]
 
     # test index
-    index = 1
-
+    index = 7
     host = "localhost"
     port = 8000
     router = test_map[index]["name"]

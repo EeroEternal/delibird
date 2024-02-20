@@ -35,7 +35,7 @@ class Base(metaclass=Meta):
         headers=None,
         params=None,
         body=None,
-        filter_func=common_decode,
+        filter_func=None,
         split_tag="\n\n",
         done_tag="[DONE]",
     ):
@@ -141,17 +141,15 @@ class Base(metaclass=Meta):
                 head_str = buffer[:first_index]
 
                 # 如果有处理函数，就调用处理函数。返回处理后的数据
-                # 如果没有处理函数，就直接返回数据
+                # 如果没有处理函数，就使用 common_decode 处理
                 # result 是处理是否成功，snippet_data 是处理后的数据
-                if filter_func:
-                    result, snippet_data = filter_func(head_str)
+                filter_func = filter_func or common_decode
 
-                    # 数据处理没有成功，跳出
-                    if not result:
-                        break
-                else:
-                    result = True
-                    snippet_data = head_str
+                result, snippet_data = filter_func(head_str)
+
+                # 数据处理没有成功，跳出
+                if not result:
+                    break
 
                 # 如果数据是结束标记，跳出
                 if snippet_data == end_tag:

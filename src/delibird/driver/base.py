@@ -2,6 +2,7 @@
 
 import aiohttp
 import websocket
+from delibird.util import common_decode
 
 
 class Meta(type):
@@ -34,7 +35,7 @@ class Base(metaclass=Meta):
         headers=None,
         params=None,
         body=None,
-        filter_func=None,
+        filter_func=common_decode,
         split_tag="\n\n",
         done_tag="[DONE]",
     ):
@@ -48,7 +49,7 @@ class Base(metaclass=Meta):
             header: 如何存在，就按照这个 header 发送请求
             params: 如何存在，就按照这个 params 发送请求
             body: 如何存在，就按照这个 body 发送请求
-            filter_func: 过滤数据的函数
+            filter_func: 过滤数据的函数. 默认是 common_decode，通用解析方式
             split_tag: 分割数据的标志
             done_tag: 完成的标志
         """
@@ -88,7 +89,7 @@ class Base(metaclass=Meta):
             model: 对应的模型名称。格式为例如 qwen 就是 qwen-max、qwen-min、qwen-speed、qwen-turbo
             headers: 请求头
             body: 请求体
-            filter_func: 过滤数据的函数
+            filter_func: 过滤数据的函数. 默认是 common_decode，通用解析方式
             split_tag: 分割数据的标志
             end_tag: 完成的标志
         """
@@ -96,7 +97,10 @@ class Base(metaclass=Meta):
             raise ValueError("url 不能为空")
 
         if not headers:
-            headers = {}
+            headers = {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + self.api_key,
+            }
 
         if not body:
             body = (

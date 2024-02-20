@@ -16,6 +16,7 @@ test_map = [
     },
     {"name": "minimax", "model": "abab5.5-chat"},
     {"name": "baichuan", "model": "Baichuan2-Turbo"},
+    {"name": "moonshot", "model": "moonshot-v1-8k"},
 ]
 
 
@@ -27,7 +28,7 @@ async def stream_fetch():
     ]
 
     # test index
-    index = 3
+    index = 5
 
     host = "localhost"
     port = 8000

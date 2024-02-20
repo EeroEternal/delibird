@@ -2,7 +2,7 @@
 import tomllib
 from delibird.util import Log
 from fastapi.responses import StreamingResponse
-from delibird.driver import Base, Ernie, Qwen, Minimax, Spark, Chatglm, Baichuan
+from delibird.driver import *
 
 import sys
 
@@ -59,46 +59,44 @@ class Gateway:
 
     def send(self, router, messages, model):
         """对不同的 router 发送请求."""
-        logger = Log("delibird")
 
-        # 根据 router 从 self.__routers 中获取对应的 driver
-        driver_name = self._driver_name(router)
-        if not driver_name:
-            return f"{router} 或者 {router} 对应的 driver 不存在"
+        # 根据 router 获取 driver 名称.
+        # self._routers 是一个数组
+        driver_names = [
+            router.get("driver")
+            for router in self.__routers
+            if router.get("name") == router
+        ]
+
+        # 如果 driver_names 长度不为 1，说明配置文件中有重复的 router
+        if len(driver_names) != 1:
+            return "配置文件中有重复的 router"
+
+        # 获取 driver 名称
+        driver_name = driver_names[0]
 
         # 根据 driver 获取对应的类
-        class_name = driver_name.capitalize()
-        router_object = Base(class_type=class_name)  # type: ignore
-
-        if not router_object:
+        driver_name = driver_name.capitalize()
+        driver_object = Base(class_type=driver_name)  # type: ignore
+        if not driver_object:
             return "实例化失败"
 
-        # 获取 driver 对应的配置
-        driver_config = self._driver_config(driver_name)
+        # 获取 router 对应的配置
+        router_config = self._drivers.get(router)
+        if not router_config:
+            return f"{router_config} 对应的配置不存在"
 
-        if not driver_config:
-            return f"{driver_name} 对应的配置不存在"
-
-        result, message = router_object.read_config(driver_config)
+        result, message = driver_object.read_config(router_config)
         if not result:
-            logger.echo(message, "error")
             return message
 
         return StreamingResponse(
-            router_object.send(messages, model), media_type="text/event-stream"
+            driver_object.send(messages, model), media_type="text/event-stream"
         )
 
-    def _driver_name(self, router):
-        """根据 router 获取对应的 driver."""
-        for item in self.__routers:
-            if item.get("name") == router:
-                return item.get("driver")
-
-        return None
-
-    def _driver_config(self, driver_name):
-        """根据 driver_name 获取对应的配置."""
-        driver_config = self._drivers.get(driver_name)
+    def _router_config(self, router_name):
+        """根据 router_name 获取对应的配置."""
+        driver_config = self._drivers.get(router_name)
         return driver_config if driver_config else None
 
     def _check_drivers(self):

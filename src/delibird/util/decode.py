@@ -78,10 +78,18 @@ def common_decode(data):
     except json.JSONDecodeError as e:
         return False, ""
 
-    # 检查 choices 下面是否有 finish_reason 字段
+    # 检查 choices 下面 finish_reason 字段是否有值。可能是 stop 或者其他
     # 如果有，说明是最后一条消息。在返回的消息后面加上 [DONE]
     # 让调用者知道已经结束了
-    if "choices" in data and "finish_reason" in data:
+    if (
+        "choices" in data
+        and "finish_reason" in data["choices"][0]
+        and data["choices"][0]["finish_reason"]
+    ):
+        # 有的 finish_reason 不带数据
+        if "delta" not in data:
+            return True, end_tag
+
         return True, data["choices"][0]["delta"]["content"] + end_tag
 
     # 返回 choices 下面的 delta 下的 content 字段，就是消息内容

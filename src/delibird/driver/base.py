@@ -145,7 +145,6 @@ class Base(metaclass=Meta):
                 # result 是处理是否成功，snippet_data 是处理后的数据
                 if filter_func:
                     result, snippet_data = filter_func(head_str)
-                    print(f"snipper_data: {snippet_data}")
 
                     # 数据处理没有成功，跳出
                     if not result:

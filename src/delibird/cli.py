@@ -3,9 +3,9 @@ import psutil
 import subprocess
 
 from delibird.server import app
-from delibird.log import Log, LogLevel
-from delibird.pm import kill_process, http_process
-from delibird.config import read_config
+from delibird.util import Log, LogLevel
+from delibird.util import kill_process, http_process
+from delibird.util import read_config
 
 
 @click.group()

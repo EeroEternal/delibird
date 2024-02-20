@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 from http import HTTPStatus
 import dashscope
 from .base import Base
-from delibird.log import Log
+from delibird.util import Log
 
 
 class Qwen(Base):

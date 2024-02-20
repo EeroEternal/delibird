@@ -1,5 +1,5 @@
 from .base import Base
-from .common import common_decode
+from delibird.util import common_decode
 
 
 class Baichuan(Base):

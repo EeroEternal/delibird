@@ -3,7 +3,7 @@
 import os
 import subprocess
 from multiprocessing import Process, cpu_count
-from delibird.config import read_config
+from .config import read_config
 
 
 def kill_process():

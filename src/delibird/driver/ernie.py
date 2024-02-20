@@ -1,11 +1,10 @@
 """百度文心."""
 from re import S
-from delibird.log import Log
+from delibird.util import Log, decode_data
 import aiohttp
 import json
 from .base import Base
 from fastapi.responses import StreamingResponse
-from .common import decode_data
 
 url_map = {
     "ernie-v4": "completions_pro",

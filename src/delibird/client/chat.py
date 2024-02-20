@@ -2,7 +2,7 @@
 import aiohttp
 import asyncio
 import json
-from delibird.log import Log
+from delibird.util import Log
 
 
 class Chat:

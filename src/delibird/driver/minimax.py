@@ -2,8 +2,7 @@
 
 from .base import Base
 import json
-from delibird.log import Log
-from .common import decode_data
+from delibird.util import Log, decode_data
 
 
 class Minimax(Base):

@@ -14,11 +14,10 @@ from websocket import create_connection
 import websocket
 from wsgiref.handlers import format_date_time
 from fastapi.responses import StreamingResponse
-from delibird.log import Log
+from delibird.util import Log
 from time import sleep
 import asyncio
 from .base import Base
-from delibird.log import Log
 
 
 class Spark(Base):

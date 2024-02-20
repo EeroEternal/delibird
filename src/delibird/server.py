@@ -6,8 +6,8 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from delibird.config import read_config
-from delibird.log import Log
+from delibird.util import read_config
+from delibird.util import Log
 from delibird.router import Gateway
 
 

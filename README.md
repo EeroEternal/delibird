@@ -87,8 +87,7 @@ api_key = "XXX"
 secret_key = "XXX"
 url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat"
 access_token = "XXX"
-models = [ "ernie", "ernie-v4", "ernie-8k", "ernie-bot", "ernie-speed", "ernie-bot-turbo",
-]
+models = [ "ernie", "ernie-v4", "ernie-8k", "ernie-bot", "ernie-speed", "ernie-bot-turbo"]
 
 [config.minimax]
 api_key = "XXX"

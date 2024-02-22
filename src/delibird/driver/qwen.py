@@ -1,11 +1,8 @@
 """Qwen 接口."""
-from logging import Logger
-import platform
 from fastapi.responses import StreamingResponse
 from http import HTTPStatus
 import dashscope
 from .base import Base
-from delibird.util import Log
 
 
 class Qwen(Base):

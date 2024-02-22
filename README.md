@@ -65,7 +65,7 @@ routers = [
     { name = "minimax", driver = "minimax" },
     { name = "chatglm", driver = "chatglm" },
     { name = "baichuan", driver = "base" },
-    { name = "moonshot", driver = "base" }]
+    { name = "moonshot", driver = "base" }] 
 
 [config]
 [config.spark]

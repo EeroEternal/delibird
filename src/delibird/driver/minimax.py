@@ -39,7 +39,7 @@ class Minimax(Base):
             protocol: 请求协议 http 或者 websocket
         """
         if not self.url:
-            raise ValueError("url 不能为空")
+            yield "url 不能为空"
 
         # 给 url 增加 group_id
         self.url = self.url + "?GroupId=" + self.group_id

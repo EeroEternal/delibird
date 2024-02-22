@@ -8,3 +8,4 @@ versioneer==0.29
 setuptools==69.0.3
 aiohttp==3.9.3
 pyjwt==2.8.0
+volcengine==1.0.127

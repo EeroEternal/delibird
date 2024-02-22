@@ -20,6 +20,7 @@ test_map = [
     {"name": "moonshot", "model": "moonshot-v1-8k"},
     {"name": "qwen", "model": "qwen-turbo"},
     {"name": "spark", "model": "generalv3"},
+    {"name": "skylark", "model": "skylark-pro-public"},
 ]
 
 
@@ -37,7 +38,7 @@ async def stream_fetch():
     ]
 
     # test index
-    index = 7
+    index = 8
     host = "localhost"
     port = 8000
     router = test_map[index]["name"]

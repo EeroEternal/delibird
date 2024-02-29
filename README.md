@@ -24,6 +24,7 @@ Delibird 是一个多合一大模型接口网关。主要针对国内的大模�
 - [Minimax](https://api.minimax.chat/)
 - [ChatGLM](https://open.bigmodel.cn/dev/api)
 - [百川](https://www.baichuan-ai.com/home)
+- [云雀](https://www.volcengine.com/product/yunque)
 
 ## 未来计划
 - [ ] 开发管理页面
@@ -65,7 +66,7 @@ routers = [
     { name = "minimax", driver = "minimax" },
     { name = "chatglm", driver = "chatglm" },
     { name = "baichuan", driver = "base" },
-    { name = "moonshot", driver = "base" }] 
+    { name = "moonshot", driver = "base" }]
 
 [config]
 [config.spark]

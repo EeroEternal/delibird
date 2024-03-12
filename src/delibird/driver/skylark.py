@@ -18,15 +18,15 @@ class Skylark(Base):
         # 读取 url 、region、access_key, secret_key
         url = config.get("url")
         region = config.get("region")
-        access_key = config.get("access_key")
+        access_token = config.get("access_token")
         secret_key = config.get("secret_key")
 
-        if not all([url, region, access_key, secret_key]):
+        if not all([url, region, access_token, secret_key]):
             return False, "url、region、access_key、secret_key 不能为空"
 
         self.url = url
         self.region = region
-        self.access_key = access_key
+        self.access_token = access_token
         self.secret_key = secret_key
 
         return True, "success"
@@ -37,7 +37,7 @@ class Skylark(Base):
 
         maas = MaasService(self.url, self.region)
 
-        maas.set_ak(self.access_key)
+        maas.set_ak(self.access_token)
         maas.set_sk(self.secret_key)
 
         # document: "https://www.volcengine.com/docs/82379/1099475"
